@@ -1568,3 +1568,66 @@ body {
 /* 阶段5: 空 */
 .bump-empty-icon { font-size: 48px; opacity: 0.8; }
 .bump-overlay .btn-reset { color: rgba(255,255,255,0.85); }
+
+/* ===== Task 4: 玩伴列表/档案 ===== */
+.friends-list { padding: var(--sp-md) var(--sp-lg) 30px; display: flex; flex-direction: column; gap: var(--sp-md); }
+.friends-empty { text-align: center; padding: 60px 24px; }
+.friends-empty-icon { font-size: 44px; }
+.friends-empty-text { color: var(--c-text-secondary); font-size: var(--fs-body); margin: 12px 0 20px; }
+.friend-card {
+  background: var(--c-surface); border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm); padding: 14px 16px;
+}
+.friend-card-main { display: flex; gap: 12px; align-items: center; }
+.friend-avatar {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  background: var(--c-primary-light); display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.friend-avatar.big { width: 56px; height: 56px; font-size: 28px; }
+.friend-info { flex: 1; min-width: 0; }
+.friend-name { font-size: var(--fs-card-title); font-weight: 600; color: var(--c-text); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.friend-walk-status {
+  font-size: var(--fs-micro); font-weight: 600; color: var(--c-text-tertiary);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.friend-walk-status.walking { color: #5FA97F; }
+.friend-status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.friend-walk-status.walking .friend-status-dot { animation: statusPulse 1.6s ease infinite; }
+@keyframes statusPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(95,169,127,0.5); } 50% { box-shadow: 0 0 0 5px rgba(95,169,127,0); } }
+.friend-dogs { margin-top: 4px; display: flex; gap: 6px; flex-wrap: wrap; }
+.friend-dog-chip {
+  font-size: var(--fs-micro); background: var(--c-peach-light); color: var(--c-peach);
+  padding: 2px 8px; border-radius: var(--r-pill); font-weight: 600;
+}
+.friend-card-actions {
+  margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--c-border);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+/* 开关（让 ta 看见我家崽崽） */
+.friend-loc-switch { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.friend-loc-label { font-size: var(--fs-caption); color: var(--c-text-secondary); }
+.friend-loc-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.friend-loc-slider {
+  width: 36px; height: 21px; border-radius: var(--r-pill); background: var(--c-border);
+  position: relative; transition: background 0.2s; flex-shrink: 0;
+}
+.friend-loc-slider::after {
+  content: ''; position: absolute; top: 2.5px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  box-shadow: var(--shadow-sm); transition: transform 0.2s;
+}
+.friend-loc-switch input:checked + .friend-loc-slider { background: var(--c-primary); }
+.friend-loc-switch input:checked + .friend-loc-slider::after { transform: translateX(14px); }
+.friend-remove {
+  border: none; background: none; color: var(--c-text-tertiary);
+  font-size: var(--fs-caption); padding: 4px 6px;
+}
+.friend-remove:active { color: var(--c-peach); }
+/* ta 家崽崽 */
+.friend-detail-owner { display: flex; align-items: center; gap: 12px; padding: var(--sp-md) var(--sp-lg) 0; }
+.friend-detail-owner-name { font-size: var(--fs-card-title); font-weight: 600; color: var(--c-text); }
+.friend-dogs-list { padding: var(--sp-md) var(--sp-lg) 30px; display: flex; flex-direction: column; gap: var(--sp-md); }
+.friend-dog-profile {
+  background: var(--c-surface); border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm); padding: 16px;
+}

@@ -133,11 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== Forward Declarations（骨架占位，后续任务实现） =====
 function renderCircleTimeline() {}
-function renderFriendsList() {}
-function renderWalkRecords() {}
 function renderSettingsPrivacy() {}
 function renderFriendMarkers() {}
-function openFriendDetail() {}
+
+function renderWalkRecords() {}
 
 // ===== Status Bar Time =====
 function updateStatusTime() {
@@ -807,6 +806,7 @@ function initFriendsPages() {
   document.getElementById('btnBackFromSettings').addEventListener('click', () => closeSubPage('pageSettings'));
   document.getElementById('btnBackFromRecords').addEventListener('click', () => closeSubPage('pageWalkRecords'));
   document.getElementById('btnSummaryDone').addEventListener('click', () => closeSubPage('pageWalkSummary'));
+  initConfirmModal();
 }
 
 // ===== Sub-page Navigation（隐藏 TabBar 的全屏子页） =====
@@ -1080,6 +1080,7 @@ function initBump() {
     if (!bumpCandidate || isFriend(bumpCandidate.id)) return;
     myFriends.push({ ...bumpCandidate, shareMyLocTo: true });
     updateFriendCounts();
+    if (document.getElementById('pageFriends').classList.contains('active')) renderFriendsList();
     renderFriendMarkers();       // Task 6 实现；先存在即可
     // 成功撒花爪印
     document.getElementById('bumpSuccessPaws').innerHTML =
@@ -1097,4 +1098,114 @@ function initBump() {
     bumpCandidate = null;
     openBumpOverlay();
   });
+}
+
+// ===== 玩伴管理 =====
+let confirmAction = null;
+
+function openConfirmModal(text, action) {
+  document.getElementById('confirmText').textContent = text;
+  confirmAction = action;
+  openModal('confirmModal');
+}
+
+function initConfirmModal() {
+  document.getElementById('btnConfirmCancel').addEventListener('click', () => closeModal('confirmModal'));
+  document.getElementById('btnConfirmOk').addEventListener('click', () => {
+    closeModal('confirmModal');
+    if (confirmAction) { confirmAction(); confirmAction = null; }
+  });
+}
+
+function renderFriendsList() {
+  const list = document.getElementById('friendsList');
+  if (!myFriends.length) {
+    list.innerHTML = `
+      <div class="friends-empty">
+        <div class="friends-empty-icon">🐾</div>
+        <div class="friends-empty-text">还没有玩伴，去碰个爪认识新朋友吧～</div>
+        <button class="btn-confirm" id="btnBumpFromEmpty">碰个爪 🐾</button>
+      </div>`;
+    document.getElementById('btnBumpFromEmpty').addEventListener('click', () => openBumpOverlay());
+    return;
+  }
+
+  list.innerHTML = myFriends.map(f => `
+    <div class="friend-card" data-friend-id="${f.id}">
+      <div class="friend-card-main" data-action="detail">
+        <div class="friend-avatar">${f.avatar}</div>
+        <div class="friend-info">
+          <div class="friend-name">${f.name}
+            <span class="friend-walk-status ${f.isWalking ? 'walking' : ''}">
+              <span class="friend-status-dot"></span>${f.isWalking ? '正在遛弯' : '在家休息'}
+            </span>
+          </div>
+          <div class="friend-dogs">${f.dogs.map(d => `<span class="friend-dog-chip">${d.emoji} ${d.name}</span>`).join('')}</div>
+        </div>
+      </div>
+      <div class="friend-card-actions">
+        <label class="friend-loc-switch">
+          <span class="friend-loc-label">让 ta 看见我家崽崽</span>
+          <input type="checkbox" data-action="loc" ${f.shareMyLocTo ? 'checked' : ''} />
+          <span class="friend-loc-slider"></span>
+        </label>
+        <button class="friend-remove" data-action="remove">删除玩伴</button>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.friend-card').forEach(card => {
+    const f = myFriends.find(x => x.id === card.dataset.friendId);
+    card.querySelector('[data-action="detail"]').addEventListener('click', () => openFriendDetail(f.id));
+    card.querySelector('input[data-action="loc"]').addEventListener('change', (e) => {
+      f.shareMyLocTo = e.target.checked;
+    });
+    card.querySelector('[data-action="remove"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openConfirmModal('和 ' + f.name + ' 解除玩伴关系？ta 的崽崽动态将从崽崽圈消失～', () => {
+        myFriends = myFriends.filter(x => x.id !== f.id);
+        updateFriendCounts();
+        renderFriendsList();
+        renderFriendMarkers();
+        if (currentTab === 'circle') renderCircleTimeline();
+      });
+    });
+  });
+}
+
+function openFriendDetail(friendId) {
+  const f = dogFriendsPool.find(x => x.id === friendId) || myFriends.find(x => x.id === friendId);
+  if (!f) return;
+  document.getElementById('friendDetailTitle').textContent = 'ta 家崽崽';
+  document.getElementById('friendDetailOwner').innerHTML = `
+    <div class="friend-avatar big">${f.avatar}</div>
+    <div class="friend-detail-owner-name">${f.name} 的崽崽们</div>`;
+  document.getElementById('friendDogsList').innerHTML = f.dogs.map(d => `
+    <div class="friend-dog-profile">
+      <div class="dog-info-head">
+        <div class="dog-info-avatar">${d.emoji}</div>
+        <div class="dog-info-head-right">
+          <div class="dog-info-name">${d.name}</div>
+          <div class="dog-info-breed">${d.breed} · ${d.size}犬 · ${d.age} · ${d.weight}kg</div>
+        </div>
+      </div>
+      <div class="dog-info-row">
+        <span class="dog-info-label">毛色</span>
+        <span class="dog-info-color"><span class="dog-info-color-dot" style="background:${COLOR_HEX[d.color] || '#F7C873'}"></span>${d.color}</span>
+      </div>
+      <div class="dog-info-row">
+        <span class="dog-info-label">脾气</span>
+        <span class="dog-info-tags">${d.tags.map(t => '<span class="dog-tag trait">' + t + '</span>').join('')}</span>
+      </div>
+      <div class="dog-info-row">
+        <span class="dog-info-label">喜好</span>
+        <span class="dog-info-tags">${d.likes.map(t => '<span class="dog-tag trait">' + t + '</span>').join('')}</span>
+      </div>
+      <div class="dog-info-row">
+        <span class="dog-info-label">疫苗</span>
+        <span class="dog-info-vaccine">${d.vaccine}</span>
+      </div>
+    </div>
+  `).join('');
+  openSubPage('pageFriendDetail');
 }
