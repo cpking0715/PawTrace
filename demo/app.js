@@ -802,11 +802,13 @@ function initDogEditPage() {
     const activeLikes = [...document.querySelectorAll('#editLikes .tag-item.active')].map(b => b.dataset.tag);
     const emoji = document.getElementById('editAvatar').textContent;
 
+    const existing = currentEditDogId ? dogsData.find(d => d.id === currentEditDogId) : null;
+
     const dog = {
       id: currentEditDogId || Date.now(),
       name,
       emoji,
-      breed: '未知',
+      breed: existing ? existing.breed : '未知',
       size: sizeBtn ? sizeBtn.dataset.val : '小型',
       age: ageBtn ? ageBtn.dataset.val : '青年',
       tags: activeTags.length ? activeTags : ['好动爱玩'],
