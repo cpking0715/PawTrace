@@ -96,6 +96,7 @@ let walkState = {
   startLat: 0,
   startLng: 0,
   startTime: null,
+  track: [],
 };
 let walkMapTimer = null;       // 地图遛狗计时器
 let walkMoveTimer = null;      // 模拟移动计时器
@@ -113,6 +114,32 @@ document.addEventListener('touchend', () => {
   document.querySelectorAll('.touching').forEach(el => el.classList.remove('touching'));
 }, { passive: true });
 
+// ===== Walk Track Utils =====
+// 经纬度距离（米），简化球面公式
+function distMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000, rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function trackDistance(track) {
+  let d = 0;
+  for (let i = 1; i < track.length; i++) {
+    d += distMeters(track[i - 1].lat, track[i - 1].lng, track[i].lat, track[i].lng);
+  }
+  return d;
+}
+
+function formatDist(meters) {
+  return meters >= 1000 ? (meters / 1000).toFixed(1) + 'km' : Math.round(meters) + 'm';
+}
+
+function formatDuration(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60), s = totalSeconds % 60;
+  return m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+}
+
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
   initMap();
@@ -128,14 +155,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initFriendsPages();
   initBump();
   initSettingsPage();
+  initWalkSummaryPage();
   updateStatusTime();
   setInterval(updateStatusTime, 60000);
 });
 
 // ===== Forward Declarations（骨架占位，后续任务实现） =====
 function renderCircleTimeline() {}
-
-function renderWalkRecords() {}
 
 // ===== Status Bar Time =====
 function updateStatusTime() {
@@ -513,6 +539,7 @@ function startWalkingPage() {
   walkState.startLat = 30.62;
   walkState.startLng = 104.06;
   walkState.startTime = new Date();
+  walkState.track = [{ lat: walkState.startLat, lng: walkState.startLng }];
 
   // 更新遛狗页面的UI
   document.getElementById('btnStartWalkPage').style.display = 'none';
@@ -543,28 +570,8 @@ function startWalkingPage() {
 }
 
 function endWalkingPage() {
-  clearInterval(walkingTimer);
-  isWalkingActive = false;
-  walkingSeconds = 0;
-  document.getElementById('timerProgressPage').style.strokeDashoffset = 0;
-
-  // Reset UI
-  document.getElementById('walkingPageActive').style.display = 'none';
-  document.getElementById('btnStartWalkPage').style.display = '';
-  document.querySelector('#pageWalking .walking-location').style.display = '';
-  document.querySelector('#pageWalking .dog-select-list').style.display = '';
-  document.querySelector('#pageWalking .add-dog-inline').style.display = '';
-
-  // 清除遛狗状态
-  walkState.isWalking = false;
-  walkState.dogs = [];
-  walkState.startTime = null;
-
-  // 清除地图上的标记
-  hideWalkMarkers();
-
-  // Re-render list to clear selections
-  renderDogPageSelectList();
+  // 统一走结束确认流程，确保战报与手账数据一致
+  confirmEndWalk();
 }
 
 // ===== Walk Markers on Map =====
@@ -620,7 +627,7 @@ function showWalkMarkersOnMap() {
     clearInterval(walkMapTimer);
     walkMapTimer = setInterval(() => {
       walkSeconds++;
-      walkDistance += Math.floor(1.2 + Math.random() * 0.8);
+      walkDistance = Math.round(trackDistance(walkState.track));
       updateWalkStatusBar(false);
     }, 1000);
 
@@ -633,6 +640,10 @@ function showWalkMarkersOnMap() {
         dog._lat += (Math.random() - 0.4) * 0.0002;
         dog._lng += (Math.random() - 0.4) * 0.0002;
         dogMarkers[i].setLatLng([dog._lat, dog._lng]);
+        // 轨迹采样（以第一只狗位置为准，切 Tab 不中断）
+        if (i === 0 && walkState.isWalking) {
+          walkState.track.push({ lat: dog._lat, lng: dog._lng });
+        }
       });
     }, 4000);
   }
@@ -693,17 +704,33 @@ function endWalkFromMap() {
 function confirmEndWalk() {
   closeModal('endWalkModal');
 
-  // 清除地图标记
-  hideWalkMarkers();
+  const duration = walkSeconds;
+  const distance = Math.max(trackDistance(walkState.track), Math.round(walkDistance));
+  const totalWeight = walkState.dogs.reduce((s, d) => {
+    const src = dogsData.find(x => x.id === d.id);
+    return s + ((src && src.weight) || 10);
+  }, 0);
+  const calories = Math.max(1, Math.round(totalWeight * (distance / 1000) * 1.2));
 
-  // 清除遛狗状态
+  const record = {
+    id: Date.now(),
+    date: new Date().toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    duration, distance, calories,
+    track: walkState.track.slice(),
+    dogs: walkState.dogs.map(d => ({ name: d.name, emoji: d.emoji })),
+    published: false,
+  };
+  walkRecords.unshift(record);
+
+  // 清除遛狗状态（保留原逻辑）
+  hideWalkMarkers();
   walkState.isWalking = false;
   walkState.dogs = [];
   walkState.startTime = null;
+  walkState.track = [];
   walkSeconds = 0;
   walkDistance = 0;
 
-  // 同步清除遛狗页面的UI
   isWalkingActive = false;
   clearInterval(walkingTimer);
   walkingSeconds = 0;
@@ -714,6 +741,8 @@ function confirmEndWalk() {
   document.querySelector('#pageWalking .dog-select-list').style.display = '';
   document.querySelector('#pageWalking .add-dog-inline').style.display = '';
   renderDogPageSelectList();
+
+  openWalkSummary(record);
 }
 
 // ===== Init End Walk Modal =====
@@ -1297,6 +1326,103 @@ function renderFriendMarkers() {
       });
     }, 4000);
   }
+}
+
+// ===== 崽崽战报 =====
+let currentSummaryRecord = null;
+let summaryMap = null;
+let summaryLayers = [];
+
+function openWalkSummary(record) {
+  currentSummaryRecord = record;
+  document.getElementById('summaryDuration').textContent = formatDuration(record.duration);
+  document.getElementById('summaryDistance').textContent = formatDist(record.distance);
+  document.getElementById('summaryCalories').textContent = record.calories;
+  document.getElementById('summaryDogs').innerHTML =
+    record.dogs.map(d => `<span class="summary-dog">${d.emoji} ${d.name}</span>`).join('');
+  const pubBtn = document.getElementById('btnPublishWalk');
+  pubBtn.textContent = record.published ? '已晒到崽崽圈 ✓' : '晒到崽崽圈';
+  pubBtn.disabled = record.published;
+  pubBtn.classList.toggle('disabled', record.published);
+  openSubPage('pageWalkSummary');
+  setTimeout(() => renderSummaryTrack(record), 120);
+}
+
+function renderSummaryTrack(record) {
+  const el = document.getElementById('summaryMap');
+  if (!summaryMap) {
+    summaryMap = L.map(el, { zoomControl: false, attributionControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }).addTo(summaryMap);
+  }
+  summaryMap.invalidateSize();
+  summaryLayers.forEach(l => summaryMap.removeLayer(l));
+  summaryLayers = [];
+  if (!record.track || record.track.length < 2) return;
+  const latlngs = record.track.map(p => [p.lat, p.lng]);
+  const line = L.polyline(latlngs, { color: '#6BA3BE', weight: 4, opacity: 0.9 }).addTo(summaryMap);
+  const start = L.circleMarker(latlngs[0], { radius: 6, fillColor: '#5FA97F', fillOpacity: 1, color: '#fff', weight: 2 }).addTo(summaryMap);
+  const end = L.circleMarker(latlngs[latlngs.length - 1], { radius: 6, fillColor: '#F4A698', fillOpacity: 1, color: '#fff', weight: 2 }).addTo(summaryMap);
+  summaryLayers.push(line, start, end);
+  summaryMap.fitBounds(line.getBounds(), { padding: [24, 24] });
+}
+
+function initWalkSummaryPage() {
+  // btnSummaryDone 已在 initFriendsPages 中绑定返回
+  document.getElementById('btnPublishWalk').addEventListener('click', () => {
+    if (!currentSummaryRecord || currentSummaryRecord.published) return;
+    openModal('publishWalkModal');
+    document.getElementById('publishWalkStats').innerHTML =
+      `<span>⏱ ${formatDuration(currentSummaryRecord.duration)}</span><span>📍 ${formatDist(currentSummaryRecord.distance)}</span><span>🔥 ${currentSummaryRecord.calories} 大卡</span>`;
+    document.getElementById('publishWalkText').value = '';
+  });
+  document.getElementById('btnPublishWalkConfirm').addEventListener('click', () => {
+    const r = currentSummaryRecord;
+    if (!r) return;
+    circlePosts.unshift({
+      id: 'post' + Date.now(), authorId: 'me', authorName: '我', authorAvatar: '🏠',
+      dogName: r.dogs.map(d => d.name).join('、'), dogEmoji: r.dogs[0] ? r.dogs[0].emoji : '🐶',
+      cover: { gradient: 'linear-gradient(135deg, #6BA3BE 0%, #5A9BB5 100%)', emoji: '🏅' },
+      text: document.getElementById('publishWalkText').value.trim() || '今天的遛弯战报出炉啦～',
+      time: '刚刚', likes: 0, likedByMe: false,
+      type: 'walkReport',
+      stats: { duration: r.duration, distance: r.distance, calories: r.calories },
+    });
+    r.published = true;
+    closeModal('publishWalkModal');
+    const pubBtn = document.getElementById('btnPublishWalk');
+    pubBtn.textContent = '已晒到崽崽圈 ✓';
+    pubBtn.disabled = true;
+    pubBtn.classList.add('disabled');
+  });
+}
+
+// ===== 崽崽手账 =====
+function renderWalkRecords() {
+  const list = document.getElementById('recordsList');
+  if (!walkRecords.length) {
+    list.innerHTML = '<div class="places-empty">还没有遛弯记录，带崽崽出去遛弯吧～</div>';
+    return;
+  }
+  list.innerHTML = walkRecords.map(r => `
+    <div class="record-card" data-record-id="${r.id}">
+      <div class="record-card-top">
+        <span class="record-date">${r.date}</span>
+        ${r.published ? '<span class="record-published">已晒圈</span>' : ''}
+      </div>
+      <div class="record-stats">
+        <span>⏱ ${formatDuration(r.duration)}</span>
+        <span>📍 ${formatDist(r.distance)}</span>
+        <span>🔥 ${r.calories} 大卡</span>
+      </div>
+      <div class="record-dogs">${r.dogs.map(d => `<span class="friend-dog-chip">${d.emoji} ${d.name}</span>`).join('')}</div>
+    </div>
+  `).join('');
+  list.querySelectorAll('.record-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const r = walkRecords.find(x => x.id === parseInt(card.dataset.recordId));
+      if (r) openWalkSummary(r);
+    });
+  });
 }
 
 function showFriendDogCard(f, dog, isFriendOwner) {

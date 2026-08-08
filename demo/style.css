@@ -1702,3 +1702,42 @@ body {
   background: var(--c-primary-light); color: var(--c-primary);
   padding: 2px 8px; border-radius: var(--r-pill); vertical-align: 2px; margin-left: 6px;
 }
+
+/* ===== Task 7: 崽崽战报/手账 ===== */
+.summary-body { padding: 0 var(--sp-lg) 30px; }
+.summary-map { height: 190px; border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow-sm); background: var(--c-primary-light); }
+.summary-stats { display: flex; gap: var(--sp-sm); margin-top: var(--sp-md); }
+.summary-stat {
+  flex: 1; background: var(--c-surface); border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm); padding: 14px 8px; text-align: center;
+}
+.summary-stat-num { font-size: 20px; font-weight: 700; color: var(--c-primary); font-family: var(--font-en); }
+.summary-stat-label { font-size: var(--fs-micro); color: var(--c-text-secondary); margin-top: 2px; }
+.summary-dogs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--sp-md); }
+.summary-dog {
+  background: var(--c-peach-light); color: var(--c-text);
+  font-size: var(--fs-caption); font-weight: 600;
+  padding: 5px 12px; border-radius: var(--r-pill);
+}
+.summary-actions { display: flex; gap: 12px; margin-top: var(--sp-lg); }
+.summary-actions button { flex: 1; }
+.btn-confirm.disabled, .btn-confirm:disabled { opacity: 0.5; }
+.publish-walk-stats {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  background: var(--c-primary-light); border-radius: var(--r-card);
+  padding: 12px; font-size: var(--fs-caption); color: var(--c-primary); font-weight: 600;
+}
+.records-list { padding: var(--sp-md) var(--sp-lg) 30px; display: flex; flex-direction: column; gap: var(--sp-md); }
+.record-card {
+  background: var(--c-surface); border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm); padding: 14px 16px;
+}
+.record-card:active { transform: scale(0.98); }
+.record-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.record-date { font-size: var(--fs-caption); color: var(--c-text-tertiary); }
+.record-published {
+  font-size: var(--fs-micro); color: var(--c-peach); background: var(--c-peach-light);
+  padding: 2px 8px; border-radius: var(--r-pill); font-weight: 600;
+}
+.record-stats { display: flex; gap: 12px; font-size: var(--fs-body); color: var(--c-text); font-weight: 600; }
+.record-dogs { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
