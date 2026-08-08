@@ -40,9 +40,7 @@ let currentEditDogId = null;
 // ===== Walk State (global遛狗状态) =====
 let walkState = {
   isWalking: false,
-  dogName: '',
-  dogBreed: '',
-  dogEmoji: '',
+  dogs: [],        // [{ id, name, breed, emoji }] 本次遛狗的所有狗（运行期挂 _lat/_lng）
   startLat: 0,
   startLng: 0,
   startTime: null,
@@ -50,11 +48,9 @@ let walkState = {
 let walkMapTimer = null;       // 地图遛狗计时器
 let walkMoveTimer = null;      // 模拟移动计时器
 let userMarker = null;         // 用户位置标记
-let dogMarker = null;          // 狗狗标记
+let dogMarkers = [];           // 狗狗标记数组
 let walkSeconds = 0;           // 地图遛狗秒数
 let walkDistance = 0;          // 模拟距离(米)
-let dogCurrentLat = 0;         // 狗狗当前位置
-let dogCurrentLng = 0;
 
 // ===== Tactile Feedback =====
 document.addEventListener('touchstart', (e) => {
@@ -391,7 +387,7 @@ function renderDogPageSelectList() {
       <div class="dog-select-avatar">${dog.emoji}</div>
       <div class="dog-select-info">
         <div class="dog-select-name">${dog.name}</div>
-        <div class="dog-select-desc">${dog.breed} · ${dog.size}型 · ${dog.tags.join('、')}</div>
+        <div class="dog-select-desc">${dog.breed} · ${dog.size} · ${dog.tags.join('、')}</div>
       </div>
       <div class="dog-select-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
     </div>
@@ -438,16 +434,17 @@ function startWalkingPage() {
     return;
   }
 
-  // 获取第一只选中的狗的信息
-  const firstSelectedId = parseInt(selected[0].dataset.dogId);
-  const dog = dogsData.find(d => d.id === firstSelectedId);
-  if (!dog) return;
+  // 收集所有选中的狗
+  const selectedDogs = [];
+  selected.forEach(card => {
+    const dog = dogsData.find(d => d.id === parseInt(card.dataset.dogId));
+    if (dog) selectedDogs.push({ id: dog.id, name: dog.name, breed: dog.breed, emoji: dog.emoji });
+  });
+  if (selectedDogs.length === 0) return;
 
   // 记录遛狗状态（Demo 无真实定位，「当前位置」固定为城市中心人民公园附近）
   walkState.isWalking = true;
-  walkState.dogName = dog.name;
-  walkState.dogBreed = dog.breed;
-  walkState.dogEmoji = dog.emoji;
+  walkState.dogs = selectedDogs;
   walkState.startLat = 30.62;
   walkState.startLng = 104.06;
   walkState.startTime = new Date();
@@ -495,6 +492,7 @@ function endWalkingPage() {
 
   // 清除遛狗状态
   walkState.isWalking = false;
+  walkState.dogs = [];
   walkState.startTime = null;
 
   // 清除地图上的标记
@@ -512,16 +510,11 @@ function showWalkMarkersOnMap() {
 
   // 清除旧标记（如果存在）
   if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
-  if (dogMarker) { map.removeLayer(dogMarker); dogMarker = null; }
+  dogMarkers.forEach(m => { if (m) map.removeLayer(m); });
+  dogMarkers = [];
 
   const startLat = walkState.startLat;
   const startLng = walkState.startLng;
-
-  // 狗狗位置偏移（约80米）—— 仅首次设置
-  if (!isRestore) {
-    dogCurrentLat = startLat + 0.0007;
-    dogCurrentLng = startLng + 0.0005;
-  }
 
   // 用户位置标记（蓝色脉冲圆点）
   const userIcon = L.divIcon({
@@ -532,14 +525,22 @@ function showWalkMarkersOnMap() {
   });
   userMarker = L.marker([startLat, startLng], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
 
-  // 狗狗标记
-  const dogIcon = L.divIcon({
-    className: '',
-    html: `<div class="dog-map-marker"><div class="dog-map-icon">${walkState.dogEmoji}</div><div class="dog-map-name">${walkState.dogName}</div></div>`,
-    iconSize: [50, 56],
-    iconAnchor: [25, 28],
+  // 多只狗狗标记：在起点附近错开排布（约 60~90 米间隔），互不重叠、可独立点击
+  walkState.dogs.forEach((dog, i) => {
+    if (!dog._lat) { dog._lat = startLat + 0.0007 + i * 0.0009; dog._lng = startLng + 0.0005 + i * 0.0007; }
+    const dogIcon = L.divIcon({
+      className: '',
+      html: `<div class="dog-map-marker"><div class="dog-map-icon">${dog.emoji}</div><div class="dog-map-name">${dog.name}</div></div>`,
+      iconSize: [50, 56],
+      iconAnchor: [25, 28],
+    });
+    const marker = L.marker([dog._lat, dog._lng], { icon: dogIcon, zIndexOffset: 900 + i }).addTo(map);
+    marker.on('click', function (e) {
+      L.DomEvent.stopPropagation(e);
+      showDogCard(dog.id);
+    });
+    dogMarkers.push(marker);
   });
-  dogMarker = L.marker([dogCurrentLat, dogCurrentLng], { icon: dogIcon, zIndexOffset: 900 }).addTo(map);
 
   // 平滑飞到当前位置
   map.flyTo([startLat, startLng], 17, { duration: 1.2 });
@@ -558,24 +559,29 @@ function showWalkMarkersOnMap() {
       updateWalkStatusBar(false);
     }, 1000);
 
-    // 模拟移动（每4秒移动一次）
+    // 模拟移动（每4秒每只狗独立小幅移动）
     clearInterval(walkMoveTimer);
     walkMoveTimer = setInterval(() => {
-      if (!walkState.isWalking || !dogMarker) return;
-      dogCurrentLat += (Math.random() - 0.4) * 0.0002;
-      dogCurrentLng += (Math.random() - 0.4) * 0.0002;
-      dogMarker.setLatLng([dogCurrentLat, dogCurrentLng]);
+      if (!walkState.isWalking || dogMarkers.length === 0) return;
+      walkState.dogs.forEach((dog, i) => {
+        if (!dogMarkers[i]) return;
+        dog._lat += (Math.random() - 0.4) * 0.0002;
+        dog._lng += (Math.random() - 0.4) * 0.0002;
+        dogMarkers[i].setLatLng([dog._lat, dog._lng]);
+      });
     }, 4000);
   }
 }
 
 function hideWalkMarkers() {
   if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
-  if (dogMarker) { map.removeLayer(dogMarker); dogMarker = null; }
+  dogMarkers.forEach(m => { if (map && m) map.removeLayer(m); });
+  dogMarkers = [];
   clearInterval(walkMapTimer);
   clearInterval(walkMoveTimer);
   walkMapTimer = null;
   walkMoveTimer = null;
+  hideDogCard();
 
   // 隐藏状态栏
   document.getElementById('walkStatusBar').style.display = 'none';
@@ -585,8 +591,10 @@ function updateWalkStatusBar(show) {
   const bar = document.getElementById('walkStatusBar');
   if (show) {
     bar.style.display = '';
-    document.getElementById('walkStatusDogEmoji').textContent = walkState.dogEmoji;
-    document.getElementById('walkStatusDogName').textContent = walkState.dogName;
+    document.getElementById('walkStatusDogEmoji').innerHTML =
+      walkState.dogs.map(d => `<span class="walk-status-dog-emoji">${d.emoji}</span>`).join('');
+    document.getElementById('walkStatusDogName').textContent =
+      walkState.dogs.map(d => d.name).join('、');
   }
   // 更新时间和距离
   const mins = Math.floor(walkSeconds / 60);
@@ -601,6 +609,10 @@ function updateWalkStatusBar(show) {
 
 // ===== End Walk from Map =====
 function endWalkFromMap() {
+  // 填充本次遛狗的所有狗
+  document.getElementById('endWalkDogs').innerHTML =
+    walkState.dogs.map(d => `<span class="end-walk-dog">${d.emoji}</span>`).join('');
+
   // 更新确认弹窗的数据
   const mins = Math.floor(walkSeconds / 60);
   const secs = walkSeconds % 60;
@@ -621,6 +633,7 @@ function confirmEndWalk() {
 
   // 清除遛狗状态
   walkState.isWalking = false;
+  walkState.dogs = [];
   walkState.startTime = null;
   walkSeconds = 0;
   walkDistance = 0;
