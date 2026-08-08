@@ -23,8 +23,8 @@ const PLACES_DATA = [
 ];
 
 let dogsData = [
-  { id: 1, name: '豆豆', emoji: '🐕', breed: '柯基', size: '小型', age: '青年', tags: ['好动爱玩'], vaccine: '已接种' },
-  { id: 2, name: '旺财', emoji: '🐩', breed: '金毛', size: '大型', age: '青年', tags: ['社会化良好'], vaccine: '已接种' },
+  { id: 1, name: '豆豆', emoji: '🐕', breed: '柯基', size: '小型', age: '青年', color: '棕色', weight: 9.5, likes: ['零食', '奔跑'], tags: ['好动爱玩', '温顺'], vaccine: '已接种' },
+  { id: 2, name: '旺财', emoji: '🐩', breed: '金毛', size: '大型', age: '青年', color: '黄色', weight: 28, likes: ['游泳', '社交'], tags: ['社会化良好', '活泼'], vaccine: '已接种' },
 ];
 
 // ===== State =====
