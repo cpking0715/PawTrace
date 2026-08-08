@@ -73,9 +73,19 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfilePage();
   initDogsPage();
   initDogEditPage();
+  initFriendsPages();
   updateStatusTime();
   setInterval(updateStatusTime, 60000);
 });
+
+// ===== Forward Declarations（骨架占位，后续任务实现） =====
+function renderCircleTimeline() {}
+function renderFriendsList() {}
+function renderWalkRecords() {}
+function renderSettingsPrivacy() {}
+function renderFriendMarkers() {}
+function openFriendDetail() {}
+function openBumpOverlay() {}
 
 // ===== Status Bar Time =====
 function updateStatusTime() {
@@ -245,7 +255,7 @@ function switchTab(page) {
 
   document.querySelectorAll('.tab-item').forEach(t => t.classList.toggle('active', t.dataset.page === page));
 
-  const pageMap = { map: 'pageMap', places: 'pagePlaces', walking: 'pageWalking', profile: 'pageProfile' };
+  const pageMap = { map: 'pageMap', places: 'pagePlaces', walking: 'pageWalking', circle: 'pageCircle', profile: 'pageProfile' };
   Object.entries(pageMap).forEach(([key, id]) => {
     const el = document.getElementById(id);
     if (key === page) {
@@ -271,6 +281,9 @@ function switchTab(page) {
   if (page === 'walking') {
     renderDogPageSelectList();
     initWalkingPageMap();
+  }
+  if (page === 'circle') {
+    renderCircleTimeline();
   }
 }
 
@@ -696,26 +709,61 @@ function renderStars(rating) {
   return html;
 }
 
+// ===== Friends Pages（返回按钮，列表渲染待 Task 4） =====
+function initFriendsPages() {
+  document.getElementById('btnBackFromFriends').addEventListener('click', () => closeSubPage('pageFriends'));
+  document.getElementById('btnBackFromFriendDetail').addEventListener('click', () => {
+    document.getElementById('pageFriendDetail').classList.remove('active');
+    document.getElementById('pageFriends').classList.add('active');
+  });
+  document.getElementById('btnBackFromSettings').addEventListener('click', () => closeSubPage('pageSettings'));
+  document.getElementById('btnBackFromRecords').addEventListener('click', () => closeSubPage('pageWalkRecords'));
+  document.getElementById('btnSummaryDone').addEventListener('click', () => closeSubPage('pageWalkSummary'));
+}
+
+// ===== Sub-page Navigation（隐藏 TabBar 的全屏子页） =====
+function openSubPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.getElementById('tabBar').style.display = 'none';
+}
+
+function closeSubPage(pageId) {
+  document.getElementById(pageId).classList.remove('active');
+  document.getElementById('tabBar').style.display = '';
+  const t = currentTab;   // 强制重新激活当前 Tab 页（switchTab 对同页会短路）
+  currentTab = '';
+  switchTab(t);
+}
+
 // ===== Profile Page =====
 function initProfilePage() {
   document.getElementById('menuMyDogs').addEventListener('click', () => {
     openDogsPage();
   });
+  document.getElementById('menuFriends').addEventListener('click', () => {
+    renderFriendsList();
+    openSubPage('pageFriends');
+  });
+  document.getElementById('menuWalkRecords').addEventListener('click', () => {
+    renderWalkRecords();
+    openSubPage('pageWalkRecords');
+  });
+  document.getElementById('menuSettings').addEventListener('click', () => {
+    renderSettingsPrivacy();
+    openSubPage('pageSettings');
+  });
 }
 
 function openDogsPage() {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('pageDogs').classList.add('active');
-  document.getElementById('tabBar').style.display = 'none';
+  openSubPage('pageDogs');
   renderDogsList();
 }
 
 // ===== Dogs Page =====
 function initDogsPage() {
   document.getElementById('btnBackFromDogs').addEventListener('click', () => {
-    document.getElementById('pageDogs').classList.remove('active');
-    document.getElementById('pageProfile').classList.add('active');
-    document.getElementById('tabBar').style.display = '';
+    closeSubPage('pageDogs');
   });
 
   document.getElementById('btnAddDog').addEventListener('click', () => {

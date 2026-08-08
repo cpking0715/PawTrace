@@ -1448,3 +1448,22 @@ body {
   .phone-screen { border-radius: 0; box-shadow: none; }
   .status-bar { height: 44px; padding-top: 8px; }
 }
+
+/* ===== Task 1: 崽崽社交骨架样式 ===== */
+.btn-bump { font-size: 18px; line-height: 1; }
+.places-search-wrap { padding: 0 var(--sp-lg) var(--sp-sm); }
+.places-search {
+  width: 100%; box-sizing: border-box; padding: 10px 16px;
+  border: 1px solid var(--c-border); border-radius: var(--r-pill);
+  background: var(--c-surface); font-size: var(--fs-body); color: var(--c-text);
+  outline: none;
+}
+.places-search:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(107,163,190,0.12); }
+.btn-publish {
+  padding: 6px 14px; border: none; border-radius: var(--r-pill);
+  background: var(--c-primary-gradient); color: #fff;
+  font-size: var(--fs-caption); font-weight: 600; box-shadow: var(--shadow-primary);
+}
+.btn-publish:active { transform: scale(0.95); }
+.friends-count { font-size: var(--fs-caption); color: var(--c-text-tertiary); font-weight: 400; }
+.menu-icon { display: flex; align-items: center; justify-content: center; }

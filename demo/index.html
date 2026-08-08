@@ -52,6 +52,7 @@
           </button>
 
           <div class="map-top-right">
+            <button class="map-btn btn-bump" id="btnBump" title="碰个爪">🐾</button>
             <button class="map-btn btn-filter" id="btnFilter" title="筛选">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D3D3D" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
             </button>
@@ -135,13 +136,39 @@
           </div>
         </div>
 
+        <!-- 好友的崽崽信息卡（地图底部） -->
+        <div class="spot-card dog-info-card" id="friendDogCard">
+          <div class="spot-card-handle"></div>
+          <div class="dog-info-body">
+            <div class="dog-info-head">
+              <div class="dog-info-avatar" id="friendDogAvatar">🐕</div>
+              <div class="dog-info-head-right">
+                <div class="dog-info-name"><span id="friendDogName">崽崽</span> <span class="friend-badge" id="friendDogBadge">玩伴</span></div>
+                <div class="dog-info-breed" id="friendDogBreed">-</div>
+              </div>
+            </div>
+            <div class="dog-info-row" id="friendDogTagsRow">
+              <span class="dog-info-label">脾气</span>
+              <span class="dog-info-tags" id="friendDogTags"></span>
+            </div>
+            <div class="dog-info-row" id="friendDogLikesRow">
+              <span class="dog-info-label">喜好</span>
+              <span class="dog-info-tags" id="friendDogLikes"></span>
+            </div>
+            <button class="btn-confirm" id="btnFriendDogBump" style="display:none;">碰碰爪交个玩伴</button>
+          </div>
+        </div>
+
         <!-- ===== 地点页 ===== -->
         <div class="page page-places" id="pagePlaces">
           <div class="page-header">
             <h1 class="page-title">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6BA3BE" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              狗狗友好地点
+              撒欢地
             </h1>
+          </div>
+          <div class="places-search-wrap">
+            <input type="text" class="places-search" id="placesSearch" placeholder="搜索撒欢地（名称/特色）" />
           </div>
           <div class="places-list" id="placesList"></div>
           <button class="fab-btn" id="btnAddPlace">
@@ -204,7 +231,7 @@
             <div class="avatar-circle">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5.172C10 3.782 8.884 2.5 7.5 2.5S5 3.782 5 5.172C5 6.562 7.5 9 7.5 9s2.5-2.438 2.5-3.828Z"/><path d="M14.5 5.172c0-1.39 1.116-2.672 2.5-2.672s2.5 1.282 2.5 2.672C19.5 6.562 17 9 17 9s-2.5-2.438-2.5-3.828Z"/><path d="M12 22c-4 0-7.5-3-7.5-7.5 0-2 1-3.5 2.5-4.5"/><path d="M12 22c4 0 7.5-3 7.5-7.5 0-2-1-3.5-2.5-4.5"/><path d="M12 22V9"/></svg>
             </div>
-            <div class="profile-name">遛狗达人</div>
+            <div class="profile-name">崽崽家长</div>
             <div class="profile-sub">已注册 30 天</div>
             <div class="profile-stats">
               <div class="profile-stat">
@@ -216,8 +243,8 @@
                 <div class="profile-stat-label">总里程(km)</div>
               </div>
               <div class="profile-stat">
-                <div class="profile-stat-num">2</div>
-                <div class="profile-stat-label">我的狗狗</div>
+                <div class="profile-stat-num" id="profileDogCount">2</div>
+                <div class="profile-stat-label">家里崽崽</div>
               </div>
             </div>
           </div>
@@ -227,28 +254,36 @@
                 <span class="menu-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6BA3BE" stroke-width="2" stroke-linecap="round"><path d="M10 5.172C10 3.782 8.884 2.5 7.5 2.5S5 3.782 5 5.172C5 6.562 7.5 9 7.5 9s2.5-2.438 2.5-3.828Z"/><path d="M14.5 5.172c0-1.39 1.116-2.672 2.5-2.672s2.5 1.282 2.5 2.672C19.5 6.562 17 9 17 9s-2.5-2.438-2.5-3.828Z"/><path d="M12 22c-4 0-7.5-3-7.5-7.5 0-2 1-3.5 2.5-4.5"/><path d="M12 22c4 0 7.5-3 7.5-7.5 0-2-1-3.5-2.5-4.5"/></svg>
                 </span>
-                <span class="menu-text">我的狗狗</span>
-                <span class="menu-badge">2只</span>
+                <span class="menu-text">家里崽崽</span>
+                <span class="menu-badge" id="menuMyDogsBadge">2只</span>
                 <span class="menu-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </span>
               </div>
-              <div class="menu-item">
+              <div class="menu-item" id="menuFriends">
+                <span class="menu-icon">🐾</span>
+                <span class="menu-text">玩伴</span>
+                <span class="menu-badge" id="menuFriendsBadge">0位</span>
+                <span class="menu-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </span>
+              </div>
+              <div class="menu-item" id="menuWalkRecords">
                 <span class="menu-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6BA3BE" stroke-width="2" stroke-linecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
                 </span>
-                <span class="menu-text">遛狗记录</span>
+                <span class="menu-text">崽崽手账</span>
                 <span class="menu-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </span>
               </div>
             </div>
             <div class="menu-group">
-              <div class="menu-item">
+              <div class="menu-item" id="menuSettings">
                 <span class="menu-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6BA3BE" stroke-width="2" stroke-linecap="round"><path d="M12 20V10"/><circle cx="12" cy="5" r="2"/></svg>
                 </span>
-                <span class="menu-text">设置</span>
+                <span class="menu-text">小窝设置</span>
                 <span class="menu-arrow">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0B0B0" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </span>
@@ -387,6 +422,111 @@
           </div>
         </div>
 
+        <!-- ===== 崽崽圈页（Tab） ===== -->
+        <div class="page page-circle" id="pageCircle">
+          <div class="page-header">
+            <h1 class="page-title">🐶 崽崽圈</h1>
+            <button class="btn-publish" id="btnPublishPost">晒崽崽</button>
+          </div>
+          <div class="circle-timeline" id="circleTimeline"></div>
+        </div>
+
+        <!-- ===== 玩伴列表页 ===== -->
+        <div class="page page-friends" id="pageFriends">
+          <div class="page-header">
+            <button class="back-btn" id="btnBackFromFriends">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              返回
+            </button>
+            <h1 class="page-title">🐾 玩伴 <span class="friends-count" id="friendsCount">(0)</span></h1>
+            <button class="btn-publish" id="btnBumpFromFriends">碰个爪</button>
+          </div>
+          <div class="friends-list" id="friendsList"></div>
+        </div>
+
+        <!-- ===== ta 家崽崽（玩伴狗狗档案） ===== -->
+        <div class="page page-friend-detail" id="pageFriendDetail">
+          <div class="page-header">
+            <button class="back-btn" id="btnBackFromFriendDetail">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              返回
+            </button>
+            <h1 class="page-title" id="friendDetailTitle">ta 家崽崽</h1>
+          </div>
+          <div class="friend-detail-owner" id="friendDetailOwner"></div>
+          <div class="friend-dogs-list" id="friendDogsList"></div>
+        </div>
+
+        <!-- ===== 小窝设置页 ===== -->
+        <div class="page page-settings" id="pageSettings">
+          <div class="page-header">
+            <button class="back-btn" id="btnBackFromSettings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              返回
+            </button>
+            <h1 class="page-title">小窝设置</h1>
+          </div>
+          <div class="settings-body">
+            <div class="settings-section-title">崽崽在哪 <span class="settings-sub">我家崽崽的行踪被谁看到</span></div>
+            <div class="privacy-option active" data-mode="friends">
+              <div class="privacy-radio"></div>
+              <div class="privacy-info">
+                <div class="privacy-name">仅玩伴可见</div>
+                <div class="privacy-desc">只有碰过爪的玩伴能看到我家崽崽的位置（推荐）</div>
+              </div>
+            </div>
+            <div class="privacy-option" data-mode="everyone">
+              <div class="privacy-radio"></div>
+              <div class="privacy-info">
+                <div class="privacy-name">所有汪星可见</div>
+                <div class="privacy-desc">附近所有崽崽家长都能看到我家崽崽的位置</div>
+              </div>
+            </div>
+            <div class="privacy-option" data-mode="off">
+              <div class="privacy-radio"></div>
+              <div class="privacy-info">
+                <div class="privacy-name">关闭行踪</div>
+                <div class="privacy-desc">谁都看不到我家崽崽的位置，安心宅家</div>
+              </div>
+            </div>
+            <div class="settings-note" id="privacyOffNote" style="display:none;">行踪已关闭～谁也看不到我家崽崽在哪 🏠</div>
+            <div class="settings-divider"></div>
+            <div class="settings-link" id="btnGoPerFriendPrivacy">单独管理：对某位玩伴隐藏行踪 ›</div>
+          </div>
+        </div>
+
+        <!-- ===== 崽崽战报页 ===== -->
+        <div class="page page-walk-summary" id="pageWalkSummary">
+          <div class="page-header">
+            <h1 class="page-title">🏅 崽崽战报</h1>
+          </div>
+          <div class="summary-body">
+            <div class="summary-map" id="summaryMap"></div>
+            <div class="summary-stats">
+              <div class="summary-stat"><div class="summary-stat-num" id="summaryDuration">00:00</div><div class="summary-stat-label">遛弯时长</div></div>
+              <div class="summary-stat"><div class="summary-stat-num" id="summaryDistance">0m</div><div class="summary-stat-label">移动距离</div></div>
+              <div class="summary-stat"><div class="summary-stat-num" id="summaryCalories">0</div><div class="summary-stat-label">消耗大卡</div></div>
+            </div>
+            <div class="summary-dogs" id="summaryDogs"></div>
+            <div class="summary-actions">
+              <button class="btn-confirm" id="btnPublishWalk">晒到崽崽圈</button>
+              <button class="btn-reset" id="btnSummaryDone">返回地图</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 崽崽手账页 ===== -->
+        <div class="page page-walk-records" id="pageWalkRecords">
+          <div class="page-header">
+            <button class="back-btn" id="btnBackFromRecords">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              返回
+            </button>
+            <h1 class="page-title">📒 崽崽手账</h1>
+          </div>
+          <div class="records-list" id="recordsList"></div>
+        </div>
+
       </div><!-- /page-container -->
 
       <!-- ========== 底部Tab栏 (5 tabs) ========== -->
@@ -401,19 +541,25 @@
           <div class="tab-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           </div>
-          <div class="tab-label">地点</div>
+          <div class="tab-label">撒欢地</div>
         </div>
         <div class="tab-item tab-walking" data-page="walking">
           <div class="tab-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 5.172C10 3.782 8.884 2.5 7.5 2.5S5 3.782 5 5.172C5 6.562 7.5 9 7.5 9s2.5-2.438 2.5-3.828Z"/><path d="M14.5 5.172c0-1.39 1.116-2.672 2.5-2.672s2.5 1.282 2.5 2.672C19.5 6.562 17 9 17 9s-2.5-2.438-2.5-3.828Z"/><path d="M12 22c-4 0-7.5-3-7.5-7.5 0-2 1-3.5 2.5-4.5"/><path d="M12 22c4 0 7.5-3 7.5-7.5 0-2-1-3.5-2.5-4.5"/><path d="M12 22V9"/></svg>
           </div>
-          <div class="tab-label">遛狗</div>
+          <div class="tab-label">遛弯</div>
+        </div>
+        <div class="tab-item" data-page="circle">
+          <div class="tab-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="9" r="3.4"/><circle cx="16" cy="9" r="3.4"/><path d="M4.6 17.5c.8-1.8 2.6-2.9 3.4-2.9s2.6 1.1 3.4 2.9"/><path d="M12.6 17.5c.8-1.8 2.6-2.9 3.4-2.9s2.6 1.1 3.4 2.9"/></svg>
+          </div>
+          <div class="tab-label">崽崽圈</div>
         </div>
         <div class="tab-item" data-page="profile">
           <div class="tab-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 5.172C10 3.782 8.884 2.5 7.5 2.5S5 3.782 5 5.172C5 6.562 7.5 9 7.5 9s2.5-2.438 2.5-3.828Z"/><path d="M14.5 5.172c0-1.39 1.116-2.672 2.5-2.672s2.5 1.282 2.5 2.672C19.5 6.562 17 9 17 9s-2.5-2.438-2.5-3.828Z"/><path d="M12 22c-4 0-7.5-3-7.5-7.5 0-2 1-3.5 2.5-4.5"/><path d="M12 22c4 0 7.5-3 7.5-7.5 0-2-1-3.5-2.5-4.5"/></svg>
           </div>
-          <div class="tab-label">我的</div>
+          <div class="tab-label">崽崽家</div>
         </div>
       </div>
 
@@ -481,6 +627,87 @@
           <div class="modal-footer">
             <button class="btn-reset" id="btnFilterReset">重置</button>
             <button class="btn-confirm" id="btnFilterConfirm">确认</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 碰个爪全屏浮层 -->
+      <div class="bump-overlay" id="bumpOverlay">
+        <button class="bump-close" id="btnBumpClose">✕</button>
+        <div class="bump-stage stage-approach" id="bumpStageApproach">
+          <div class="bump-paw paw-left">🐾</div>
+          <div class="bump-paw paw-right">🐾</div>
+          <div class="bump-tip">把手机靠近，感受附近的崽崽…</div>
+        </div>
+        <div class="bump-stage stage-radar" id="bumpStageRadar" style="display:none;">
+          <div class="bump-radar"><div class="bump-radar-ring"></div><div class="bump-radar-ring"></div><div class="bump-radar-ring"></div><div class="bump-radar-core">🐶</div></div>
+          <div class="bump-tip">正在感受附近的崽崽…</div>
+        </div>
+        <div class="bump-stage stage-result" id="bumpStageResult" style="display:none;">
+          <div class="bump-found-tip">✨ 发现一位崽崽家长 ✨</div>
+          <div class="bump-candidate-card">
+            <div class="bump-candidate-avatar" id="bumpCandidateAvatar">🧑</div>
+            <div class="bump-candidate-name" id="bumpCandidateName">-</div>
+            <div class="bump-candidate-dist" id="bumpCandidateDist">就在附近</div>
+            <div class="bump-candidate-dogs" id="bumpCandidateDogs"></div>
+          </div>
+          <button class="btn-confirm bump-confirm-btn" id="btnBumpConfirm">碰个爪，交玩伴 🐾</button>
+        </div>
+        <div class="bump-stage stage-success" id="bumpStageSuccess" style="display:none;">
+          <div class="bump-success-icon">🐾</div>
+          <div class="bump-success-paws" id="bumpSuccessPaws"></div>
+          <div class="bump-success-tip">碰爪成功，已是玩伴～</div>
+          <div class="bump-success-actions">
+            <button class="btn-confirm" id="btnBumpViewDogs">看看 ta 家崽崽</button>
+            <button class="btn-reset" id="btnBumpAgain">继续碰碰</button>
+          </div>
+        </div>
+        <div class="bump-stage stage-empty" id="bumpStageEmpty" style="display:none;">
+          <div class="bump-empty-icon">🌙</div>
+          <div class="bump-tip">附近暂时没有出来遛弯的玩伴，去别处逛逛吧～</div>
+          <button class="btn-reset" id="btnBumpEmptyClose">好的</button>
+        </div>
+      </div>
+
+      <!-- 晒崽崽发布弹窗 -->
+      <div class="modal-overlay" id="publishPostModal">
+        <div class="modal-sheet">
+          <div class="modal-handle"></div>
+          <div class="modal-header">
+            <h2>晒崽崽</h2>
+            <button class="modal-close" data-close="publishPostModal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="filter-section">
+              <div class="filter-title">选崽崽</div>
+              <div class="publish-dog-row" id="publishDogRow"></div>
+            </div>
+            <div class="filter-section">
+              <div class="filter-title">封面风格</div>
+              <div class="publish-cover-row" id="publishCoverRow"></div>
+            </div>
+            <div class="form-group">
+              <textarea class="form-input" id="publishText" rows="3" placeholder="说点什么吧～"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-confirm" id="btnPublishConfirm" style="width:100%;">发布</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 通用确认弹窗（删除玩伴等） -->
+      <div class="modal-overlay" id="confirmModal">
+        <div class="modal-sheet modal-end-walk">
+          <div class="modal-handle"></div>
+          <div class="modal-body" style="text-align:center;padding:24px 16px 8px;">
+            <div id="confirmText" style="font-size:15px;color:var(--c-text);">确认吗？</div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-reset" id="btnConfirmCancel">取消</button>
+            <button class="btn-confirm" id="btnConfirmOk">确认</button>
           </div>
         </div>
       </div>
