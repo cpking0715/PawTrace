@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDogsPage();
   initDogEditPage();
   initFriendsPages();
+  initBump();
   updateStatusTime();
   setInterval(updateStatusTime, 60000);
 });
@@ -137,7 +138,6 @@ function renderWalkRecords() {}
 function renderSettingsPrivacy() {}
 function renderFriendMarkers() {}
 function openFriendDetail() {}
-function openBumpOverlay() {}
 
 // ===== Status Bar Time =====
 function updateStatusTime() {
@@ -1015,4 +1015,86 @@ function openDogEdit(dogId) {
     document.querySelector('#editVaccine .btn-option[data-val="未接种"]').classList.add('active');
     document.querySelector('#editColor .btn-option[data-val="黄色"]').classList.add('active');
   }
+}
+
+// ===== 碰个爪（Bump） =====
+let bumpTimer = null;
+let bumpCandidate = null;
+
+function isFriend(id) { return myFriends.some(f => f.id === id); }
+
+function updateFriendCounts() {
+  const n = myFriends.length;
+  document.getElementById('friendsCount').textContent = '(' + n + ')';
+  document.getElementById('menuFriendsBadge').textContent = n + '位';
+}
+
+function pickBumpCandidate(targetId) {
+  if (targetId) {
+    const t = dogFriendsPool.find(f => f.id === targetId && !isFriend(targetId));
+    if (t) return t;
+  }
+  const candidates = dogFriendsPool.filter(f => !isFriend(f.id));
+  if (!candidates.length) return null;
+  const walking = candidates.filter(f => f.isWalking);
+  const pool = walking.length ? walking : candidates;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function showBumpStage(stage) {
+  ['Approach', 'Radar', 'Result', 'Success', 'Empty'].forEach(s => {
+    document.getElementById('bumpStage' + s).style.display = (s === stage) ? '' : 'none';
+  });
+}
+
+function openBumpOverlay(targetId) {
+  document.getElementById('bumpOverlay').classList.add('show');
+  showBumpStage('Approach');
+  clearTimeout(bumpTimer);
+  bumpTimer = setTimeout(() => showBumpStage('Radar'), 900);
+  bumpTimer = setTimeout(() => {
+    const c = pickBumpCandidate(targetId);
+    if (!c) { showBumpStage('Empty'); return; }
+    bumpCandidate = c;
+    document.getElementById('bumpCandidateAvatar').textContent = c.avatar;
+    document.getElementById('bumpCandidateName').textContent = c.name;
+    document.getElementById('bumpCandidateDist').textContent = '距离你约 ' + (80 + Math.floor(Math.random() * 300)) + 'm';
+    document.getElementById('bumpCandidateDogs').innerHTML = c.dogs.map(d =>
+      `<span class="bump-dog-chip">${d.emoji} ${d.name} · ${d.breed}</span>`).join('');
+    showBumpStage('Result');
+  }, 2600);
+}
+
+function closeBumpOverlay() {
+  clearTimeout(bumpTimer);
+  document.getElementById('bumpOverlay').classList.remove('show');
+}
+
+function initBump() {
+  document.getElementById('btnBump').addEventListener('click', () => openBumpOverlay());
+  document.getElementById('btnBumpFromFriends').addEventListener('click', () => openBumpOverlay());
+  document.getElementById('btnBumpClose').addEventListener('click', closeBumpOverlay);
+  document.getElementById('btnBumpEmptyClose').addEventListener('click', closeBumpOverlay);
+
+  document.getElementById('btnBumpConfirm').addEventListener('click', () => {
+    if (!bumpCandidate || isFriend(bumpCandidate.id)) return;
+    myFriends.push({ ...bumpCandidate, shareMyLocTo: true });
+    updateFriendCounts();
+    renderFriendMarkers();       // Task 6 实现；先存在即可
+    // 成功撒花爪印
+    document.getElementById('bumpSuccessPaws').innerHTML =
+      Array.from({ length: 8 }, () => '<span class="bump-flying-paw">🐾</span>').join('');
+    showBumpStage('Success');
+  });
+
+  document.getElementById('btnBumpViewDogs').addEventListener('click', () => {
+    const f = bumpCandidate;
+    closeBumpOverlay();
+    if (f) openFriendDetail(f.id);
+  });
+
+  document.getElementById('btnBumpAgain').addEventListener('click', () => {
+    bumpCandidate = null;
+    openBumpOverlay();
+  });
 }

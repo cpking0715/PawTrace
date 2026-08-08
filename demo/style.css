@@ -1487,3 +1487,84 @@ body {
 .treasure-reason { font-size: var(--fs-caption); color: var(--c-text-secondary); line-height: 1.5; }
 .treasure-hot { font-size: var(--fs-micro); color: var(--c-peach); margin-top: 4px; font-weight: 600; }
 .places-empty { text-align: center; color: var(--c-text-tertiary); font-size: var(--fs-body); padding: 40px 0; }
+
+/* ===== Task 3: 碰个爪浮层 ===== */
+.bump-overlay {
+  position: absolute; inset: 0; z-index: 60;
+  background: radial-gradient(circle at 50% 40%, rgba(38, 50, 58, 0.92) 0%, rgba(24, 32, 38, 0.97) 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s var(--ease-decel, ease);
+}
+.bump-overlay.show { opacity: 1; pointer-events: auto; }
+.bump-overlay .bump-stage { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 0 24px; width: 100%; box-sizing: border-box; }
+.bump-close {
+  position: absolute; top: 16px; right: 16px; z-index: 2;
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.15); color: #fff; font-size: 14px;
+}
+.bump-tip { color: rgba(255,255,255,0.85); font-size: var(--fs-body); text-align: center; }
+
+/* 阶段1: 靠近 */
+.bump-paw { font-size: 44px; }
+.stage-approach { flex-direction: row !important; flex-wrap: wrap; justify-content: center; }
+.stage-approach .bump-paw.paw-left { animation: pawLeft 0.9s ease forwards; }
+.stage-approach .bump-paw.paw-right { animation: pawRight 0.9s ease forwards; transform: scaleX(-1); }
+.stage-approach .bump-tip { width: 100%; }
+@keyframes pawLeft { from { transform: translateX(-70px); opacity: 0.3; } to { transform: translateX(-6px); opacity: 1; } }
+@keyframes pawRight { from { transform: translateX(70px) scaleX(-1); opacity: 0.3; } to { transform: translateX(6px) scaleX(-1); opacity: 1; } }
+
+/* 阶段2: 雷达 */
+.bump-radar { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; }
+.bump-radar-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(247, 200, 115, 0.7);
+  animation: radarPing 1.8s ease-out infinite;
+}
+.bump-radar-ring:nth-child(2) { animation-delay: 0.6s; }
+.bump-radar-ring:nth-child(3) { animation-delay: 1.2s; }
+.bump-radar-core { font-size: 40px; }
+@keyframes radarPing { from { transform: scale(0.3); opacity: 0.9; } to { transform: scale(1.15); opacity: 0; } }
+
+/* 阶段3: 发现 */
+.bump-found-tip { color: var(--c-gold); font-weight: 700; font-size: 15px; }
+.bump-candidate-card {
+  width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--r-card); padding: 20px; text-align: center;
+  animation: bumpCardIn 0.4s var(--ease-decel, ease);
+}
+@keyframes bumpCardIn { from { transform: translateY(20px) scale(0.95); opacity: 0; } to { transform: none; opacity: 1; } }
+.bump-candidate-avatar { font-size: 48px; }
+.bump-candidate-name { color: #fff; font-size: 17px; font-weight: 700; margin-top: 6px; }
+.bump-candidate-dist { color: rgba(255,255,255,0.6); font-size: var(--fs-caption); margin-top: 2px; }
+.bump-candidate-dogs { margin-top: 10px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.bump-dog-chip {
+  background: rgba(247,200,115,0.15); color: var(--c-gold);
+  border-radius: var(--r-pill); padding: 4px 12px; font-size: var(--fs-caption); font-weight: 600;
+}
+.bump-confirm-btn { width: 100%; }
+
+/* 阶段4: 成功 */
+.bump-success-icon { font-size: 56px; animation: bumpPop 0.5s var(--ease-decel, ease); }
+@keyframes bumpPop { 0% { transform: scale(0); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.bump-success-paws { position: absolute; inset: 0; pointer-events: none; }
+.bump-flying-paw {
+  position: absolute; left: 50%; top: 45%; font-size: 20px;
+  animation: pawFly 1s ease-out forwards;
+}
+.bump-flying-paw:nth-child(8n+1) { --dx: -90px; --dy: -110px; }
+.bump-flying-paw:nth-child(8n+2) { --dx: 80px;  --dy: -120px; animation-delay: 0.05s; }
+.bump-flying-paw:nth-child(8n+3) { --dx: -120px; --dy: -20px; animation-delay: 0.1s; }
+.bump-flying-paw:nth-child(8n+4) { --dx: 120px; --dy: -40px;  animation-delay: 0.15s; }
+.bump-flying-paw:nth-child(8n+5) { --dx: -60px; --dy: 90px;   animation-delay: 0.2s; }
+.bump-flying-paw:nth-child(8n+6) { --dx: 70px;  --dy: 100px;  animation-delay: 0.25s; }
+.bump-flying-paw:nth-child(8n+7) { --dx: 0;     --dy: -140px; animation-delay: 0.3s; }
+.bump-flying-paw:nth-child(8n)   { --dx: 0;     --dy: 120px;  animation-delay: 0.35s; }
+@keyframes pawFly { from { transform: translate(0,0) scale(0.6); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(1.1); opacity: 0; } }
+.bump-success-tip { color: #fff; font-size: 16px; font-weight: 700; }
+.bump-success-actions { display: flex; gap: 12px; width: 100%; }
+.bump-success-actions button { flex: 1; }
+.bump-success-actions .btn-reset { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* 阶段5: 空 */
+.bump-empty-icon { font-size: 48px; opacity: 0.8; }
+.bump-overlay .btn-reset { color: rgba(255,255,255,0.85); }
