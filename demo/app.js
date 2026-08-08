@@ -156,12 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initBump();
   initSettingsPage();
   initWalkSummaryPage();
+  initCirclePublish();
   updateStatusTime();
   setInterval(updateStatusTime, 60000);
 });
 
 // ===== Forward Declarations（骨架占位，后续任务实现） =====
-function renderCircleTimeline() {}
 
 // ===== Status Bar Time =====
 function updateStatusTime() {
@@ -1111,6 +1111,7 @@ function initBump() {
     myFriends.push({ ...bumpCandidate, shareMyLocTo: true });
     updateFriendCounts();
     if (document.getElementById('pageFriends').classList.contains('active')) renderFriendsList();
+    if (document.getElementById('pageCircle').classList.contains('active')) renderCircleTimeline();
     renderFriendMarkers();       // Task 6 实现；先存在即可
     // 成功撒花爪印
     document.getElementById('bumpSuccessPaws').innerHTML =
@@ -1326,6 +1327,130 @@ function renderFriendMarkers() {
       });
     }, 4000);
   }
+}
+
+// ===== 崽崽圈 =====
+let publishCoverIdx = 0;
+let publishDogId = null;
+
+function visiblePosts() {
+  const friendIds = myFriends.map(f => f.id);
+  return circlePosts
+    .filter(p => p.authorId === 'me' || friendIds.includes(p.authorId))
+    .sort((a, b) => circlePosts.indexOf(a) - circlePosts.indexOf(b));
+}
+
+function renderCircleTimeline() {
+  const tl = document.getElementById('circleTimeline');
+  const posts = visiblePosts();
+  if (!posts.length) {
+    tl.innerHTML = `
+      <div class="circle-empty">
+        <div class="circle-empty-icon">🐶</div>
+        <div class="circle-empty-text">还没有崽崽动态，去碰个爪交个玩伴吧～</div>
+        <button class="btn-confirm" id="btnBumpFromCircle">碰个爪 🐾</button>
+      </div>`;
+    document.getElementById('btnBumpFromCircle').addEventListener('click', () => openBumpOverlay());
+    return;
+  }
+
+  tl.innerHTML = posts.map(p => `
+    <div class="post-card" data-post-id="${p.id}">
+      <div class="post-header">
+        <div class="post-avatar">${p.authorAvatar}</div>
+        <div class="post-author-info">
+          <div class="post-author">${p.authorId === 'me' ? '我家崽崽' : p.authorName}</div>
+          <div class="post-time">${p.time}</div>
+        </div>
+      </div>
+      ${p.type === 'walkReport' ? `
+        <div class="post-walk-report">
+          <div class="post-walk-title">🏅 崽崽战报</div>
+          <div class="post-walk-stats">
+            <span>⏱ ${formatDuration(p.stats.duration)}</span>
+            <span>📍 ${formatDist(p.stats.distance)}</span>
+            <span>🔥 ${p.stats.calories} 大卡</span>
+          </div>
+        </div>
+      ` : `
+        <div class="post-cover" style="background:${p.cover.gradient}">${p.cover.emoji || p.dogEmoji}</div>
+      `}
+      <div class="post-text">${p.text}</div>
+      <div class="post-footer">
+        <span class="post-dog-tag">${p.dogEmoji} ${p.dogName}</span>
+        <button class="post-like ${p.likedByMe ? 'liked' : ''}" data-like>
+          <span class="like-paw">🐾</span> 拍爪 <span class="like-count">${p.likes}</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  tl.querySelectorAll('.post-card').forEach(card => {
+    card.querySelector('[data-like]').addEventListener('click', (e) => {
+      const p = circlePosts.find(x => x.id === card.dataset.postId);
+      if (!p) return;
+      p.likedByMe = !p.likedByMe;
+      p.likes += p.likedByMe ? 1 : -1;
+      const btn = e.currentTarget;
+      btn.classList.toggle('liked', p.likedByMe);
+      btn.querySelector('.like-count').textContent = p.likes;
+      if (p.likedByMe) {
+        const burst = document.createElement('span');
+        burst.className = 'like-burst';
+        burst.textContent = '🐾';
+        btn.appendChild(burst);
+        setTimeout(() => burst.remove(), 700);
+      }
+    });
+  });
+}
+
+function initCirclePublish() {
+  document.getElementById('btnPublishPost').addEventListener('click', () => {
+    // 选崽崽
+    document.getElementById('publishDogRow').innerHTML = dogsData.map(d => `
+      <div class="publish-dog-option" data-dog-id="${d.id}">
+        <div class="publish-dog-avatar">${d.emoji}</div>
+        <div class="publish-dog-name">${d.name}</div>
+      </div>`).join('');
+    publishDogId = dogsData.length ? dogsData[0].id : null;
+    document.querySelectorAll('#publishDogRow .publish-dog-option').forEach(opt => {
+      opt.classList.toggle('selected', parseInt(opt.dataset.dogId) === publishDogId);
+      opt.addEventListener('click', () => {
+        publishDogId = parseInt(opt.dataset.dogId);
+        document.querySelectorAll('#publishDogRow .publish-dog-option').forEach(o =>
+          o.classList.toggle('selected', parseInt(o.dataset.dogId) === publishDogId));
+      });
+    });
+    // 选封面
+    document.getElementById('publishCoverRow').innerHTML = COVER_PRESETS.map((c, i) => `
+      <div class="publish-cover-option ${i === 0 ? 'selected' : ''}" data-cover-idx="${i}" style="background:${c.gradient}">${c.emoji}</div>`).join('');
+    publishCoverIdx = 0;
+    document.querySelectorAll('#publishCoverRow .publish-cover-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        publishCoverIdx = parseInt(opt.dataset.coverIdx);
+        document.querySelectorAll('#publishCoverRow .publish-cover-option').forEach(o =>
+          o.classList.toggle('selected', parseInt(o.dataset.coverIdx) === publishCoverIdx));
+      });
+    });
+    document.getElementById('publishText').value = '';
+    openModal('publishPostModal');
+  });
+
+  document.getElementById('btnPublishConfirm').addEventListener('click', () => {
+    if (!publishDogId) { alert('先选一只崽崽吧～'); return; }
+    const dog = dogsData.find(d => d.id === publishDogId);
+    const cover = COVER_PRESETS[publishCoverIdx];
+    const text = document.getElementById('publishText').value.trim() || '晒晒我家崽崽～';
+    circlePosts.unshift({
+      id: 'post' + Date.now(), authorId: 'me', authorName: '我', authorAvatar: '🏠',
+      dogName: dog.name, dogEmoji: dog.emoji,
+      cover: { gradient: cover.gradient, emoji: cover.emoji },
+      text, time: '刚刚', likes: 0, likedByMe: false, type: 'normal',
+    });
+    closeModal('publishPostModal');
+    renderCircleTimeline();
+  });
 }
 
 // ===== 崽崽战报 =====
