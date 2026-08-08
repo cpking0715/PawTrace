@@ -104,7 +104,7 @@ function initMap() {
 
   renderHeatmap();
 
-  map.on('click', function () { hideSpotCard(); });
+  map.on('click', function () { hideSpotCard(); hideDogCard(); });
 
   // Park markers — warm blue circles with white border
   PARKS.forEach(park => {
@@ -180,6 +180,57 @@ function showSpotCard(park) {
 
 function hideSpotCard() {
   document.getElementById('spotCard').classList.remove('show');
+}
+
+// ===== Dog Info Card =====
+const COLOR_HEX = {
+  '黄色': '#F7C873', '白色': '#F1EFEA', '黑色': '#4A4A4A', '棕色': '#A5713F',
+  '花色': 'conic-gradient(#fff 0 25%, #4A4A4A 0 50%, #fff 0 75%, #4A4A4A 0)',
+  '灰色': '#B8B8B8',
+};
+
+function showDogCard(dogId) {
+  const dog = dogsData.find(d => d.id === dogId);
+  if (!dog) return;
+  hideSpotCard();
+
+  document.getElementById('dogInfoAvatar').textContent = dog.emoji;
+  document.getElementById('dogInfoName').textContent = dog.name;
+  document.getElementById('dogInfoBreed').textContent =
+    dog.breed + ' · ' + dog.size + '犬 · ' + dog.age + ' · ' + (dog.weight ? dog.weight + 'kg' : '-');
+  document.getElementById('dogInfoVaccine').textContent = dog.vaccine;
+
+  const colorRow = document.getElementById('dogInfoColorRow');
+  if (dog.color) {
+    document.getElementById('dogInfoColorDot').style.background = COLOR_HEX[dog.color] || '#F7C873';
+    document.getElementById('dogInfoColorText').textContent = dog.color;
+    colorRow.style.display = '';
+  } else {
+    colorRow.style.display = 'none';
+  }
+
+  const tagsRow = document.getElementById('dogInfoTagsRow');
+  if (dog.tags && dog.tags.length) {
+    document.getElementById('dogInfoTags').innerHTML = dog.tags.map(t => `<span class="dog-tag trait">${t}</span>`).join('');
+    tagsRow.style.display = '';
+  } else {
+    tagsRow.style.display = 'none';
+  }
+
+  const likesRow = document.getElementById('dogInfoLikesRow');
+  if (dog.likes && dog.likes.length) {
+    document.getElementById('dogInfoLikes').innerHTML = dog.likes.map(t => `<span class="dog-tag trait">${t}</span>`).join('');
+    likesRow.style.display = '';
+  } else {
+    likesRow.style.display = 'none';
+  }
+
+  document.getElementById('dogInfoCard').classList.add('show');
+  document.getElementById('btnDogInfoEdit').onclick = () => { hideDogCard(); openDogEdit(dog.id); };
+}
+
+function hideDogCard() {
+  document.getElementById('dogInfoCard').classList.remove('show');
 }
 
 // ===== Tab Bar (5 tabs) =====
