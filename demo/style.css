@@ -1659,3 +1659,46 @@ body {
 }
 .settings-divider { height: 1px; background: var(--c-border); margin: var(--sp-lg) 0; }
 .settings-link { color: var(--c-primary); font-size: var(--fs-body); font-weight: 600; }
+
+/* ===== Task 6: 地图玩伴/陌生汪标记 ===== */
+.friend-dog-marker { position: relative; width: 56px; height: 64px; text-align: center; }
+.friend-marker-halo {
+  position: absolute; left: 50%; top: 20px; width: 46px; height: 46px;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  border: 2.5px solid rgba(107, 163, 190, 0.85);
+  animation: haloPulse 1.8s ease-out infinite;
+}
+@keyframes haloPulse {
+  0% { box-shadow: 0 0 0 0 rgba(107,163,190,0.45); }
+  100% { box-shadow: 0 0 0 14px rgba(107,163,190,0); }
+}
+.friend-marker-icon {
+  position: absolute; left: 50%; top: 20px; transform: translate(-50%, -50%);
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #fff; border: 2.5px solid var(--c-primary);
+  display: flex; align-items: center; justify-content: center; font-size: 19px;
+  box-shadow: var(--shadow-md);
+  animation: friendMarkerBounce 1.3s ease-in-out infinite;
+}
+@keyframes friendMarkerBounce {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, calc(-50% - 7px)); }
+}
+.friend-marker-name {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  background: rgba(61,61,61,0.85); color: #fff; white-space: nowrap;
+  font-size: var(--fs-micro); padding: 2px 7px; border-radius: var(--r-pill);
+}
+.stranger-dog-marker { position: relative; width: 50px; height: 56px; text-align: center; }
+.stranger-marker-icon {
+  position: absolute; left: 50%; top: 18px; transform: translate(-50%, -50%);
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--c-border);
+  display: flex; align-items: center; justify-content: center; font-size: 17px;
+  box-shadow: var(--shadow-sm);
+}
+.friend-badge {
+  display: inline-block; font-size: var(--fs-micro); font-weight: 700;
+  background: var(--c-primary-light); color: var(--c-primary);
+  padding: 2px 8px; border-radius: var(--r-pill); vertical-align: 2px; margin-left: 6px;
+}

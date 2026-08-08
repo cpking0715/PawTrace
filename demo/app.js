@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== Forward Declarations（骨架占位，后续任务实现） =====
 function renderCircleTimeline() {}
-function renderFriendMarkers() {}
 
 function renderWalkRecords() {}
 
@@ -161,7 +160,7 @@ function initMap() {
 
   renderHeatmap();
 
-  map.on('click', function () { hideSpotCard(); hideDogCard(); });
+  map.on('click', function () { hideSpotCard(); hideDogCard(); hideFriendDogCard(); });
 
   // Park markers — warm blue circles with white border
   PARKS.forEach(park => {
@@ -184,6 +183,8 @@ function initMap() {
   document.getElementById('btnLocate').addEventListener('click', () => {
     map.setView([30.62, 104.06], 15, { animate: true });
   });
+
+  renderFriendMarkers();
 }
 
 function generateHeatPoints(parks, sizeFilter) {
@@ -1232,4 +1233,96 @@ function initSettingsPage() {
     renderFriendsList();
     document.getElementById('pageFriends').classList.add('active');
   });
+}
+
+// ===== 地图：玩伴崽崽标记 + 陌生汪标记 =====
+let friendMarkers = [];
+let friendMoveTimer = null;
+
+function hideFriendDogCard() {
+  document.getElementById('friendDogCard').classList.remove('show');
+}
+
+function renderFriendMarkers() {
+  if (!map) return;
+  friendMarkers.forEach(m => map.removeLayer(m.marker));
+  friendMarkers = [];
+
+  // 1) 玩伴的崽崽：仅 isWalking 显示，弹跳 + 光环
+  myFriends.filter(f => f.isWalking).forEach(f => {
+    f.dogs.forEach((dog, di) => {
+      const lat = f.loc.lat + di * 0.0009;
+      const lng = f.loc.lng + di * 0.0007;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="friend-dog-marker"><div class="friend-marker-halo"></div><div class="friend-marker-icon">${dog.emoji}</div><div class="friend-marker-name">${dog.name}</div></div>`,
+        iconSize: [56, 64], iconAnchor: [28, 36],
+      });
+      const marker = L.marker([lat, lng], { icon, zIndexOffset: 1200 }).addTo(map);
+      marker.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        showFriendDogCard(f, dog, true);
+      });
+      friendMarkers.push({ marker, f, lat, lng });
+    });
+  });
+
+  // 2) 开放定位的陌生汪：openToAll && isWalking && 非玩伴，普通样式
+  dogFriendsPool.filter(f => f.openToAll && f.isWalking && !isFriend(f.id)).forEach(f => {
+    f.dogs.forEach((dog, di) => {
+      const lat = f.loc.lat + di * 0.0009;
+      const lng = f.loc.lng + di * 0.0007;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="stranger-dog-marker"><div class="stranger-marker-icon">${dog.emoji}</div><div class="friend-marker-name">${dog.name}</div></div>`,
+        iconSize: [50, 56], iconAnchor: [25, 30],
+      });
+      const marker = L.marker([lat, lng], { icon, zIndexOffset: 1100 }).addTo(map);
+      marker.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
+        showFriendDogCard(f, dog, false);
+      });
+      friendMarkers.push({ marker, f, lat, lng });
+    });
+  });
+
+  // 缓慢随机移动（模拟遛弯，每 4 秒）
+  clearInterval(friendMoveTimer);
+  if (friendMarkers.length) {
+    friendMoveTimer = setInterval(() => {
+      friendMarkers.forEach(fm => {
+        fm.lat += (Math.random() - 0.5) * 0.0002;
+        fm.lng += (Math.random() - 0.5) * 0.0002;
+        fm.marker.setLatLng([fm.lat, fm.lng]);
+      });
+    }, 4000);
+  }
+}
+
+function showFriendDogCard(f, dog, isFriendOwner) {
+  hideSpotCard(); hideDogCard();
+  document.getElementById('friendDogAvatar').textContent = dog.emoji;
+  document.getElementById('friendDogName').textContent = dog.name;
+  document.getElementById('friendDogBreed').textContent =
+    dog.breed + ' · ' + dog.size + '犬 · ' + dog.age + ' · ' + dog.weight + 'kg';
+
+  const tagsRow = document.getElementById('friendDogTagsRow');
+  if (dog.tags && dog.tags.length) {
+    document.getElementById('friendDogTags').innerHTML = dog.tags.map(t => `<span class="dog-tag trait">${t}</span>`).join('');
+    tagsRow.style.display = '';
+  } else tagsRow.style.display = 'none';
+
+  const likesRow = document.getElementById('friendDogLikesRow');
+  if (dog.likes && dog.likes.length) {
+    document.getElementById('friendDogLikes').innerHTML = dog.likes.map(t => `<span class="dog-tag trait">${t}</span>`).join('');
+    likesRow.style.display = '';
+  } else likesRow.style.display = 'none';
+
+  const badge = document.getElementById('friendDogBadge');
+  const bumpBtn = document.getElementById('btnFriendDogBump');
+  badge.style.display = isFriendOwner ? '' : 'none';
+  bumpBtn.style.display = isFriendOwner ? 'none' : '';
+  bumpBtn.onclick = () => { hideFriendDogCard(); openBumpOverlay(f.id); };
+
+  document.getElementById('friendDogCard').classList.add('show');
 }
