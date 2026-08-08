@@ -709,6 +709,17 @@ function initDogEditPage() {
     btn.addEventListener('click', () => btn.classList.toggle('active'));
   });
 
+  document.querySelectorAll('#editColor .btn-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#editColor .btn-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('#editLikes .tag-item').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('active'));
+  });
+
   const avatarEmojis = ['🐕', '🐩', '🐶', '🦮', '🐕‍🦺', '🐾'];
   let avatarIdx = 0;
   document.getElementById('editAvatar').addEventListener('click', () => {
@@ -722,6 +733,9 @@ function initDogEditPage() {
     const ageBtn = document.querySelector('#editAge .btn-option.active');
     const vaccineBtn = document.querySelector('#editVaccine .btn-option.active');
     const activeTags = [...document.querySelectorAll('#editTags .tag-item.active')].map(b => b.dataset.tag);
+    const colorBtn = document.querySelector('#editColor .btn-option.active');
+    const weightVal = document.getElementById('editWeight').value.trim();
+    const activeLikes = [...document.querySelectorAll('#editLikes .tag-item.active')].map(b => b.dataset.tag);
     const emoji = document.getElementById('editAvatar').textContent;
 
     const dog = {
@@ -733,6 +747,9 @@ function initDogEditPage() {
       age: ageBtn ? ageBtn.dataset.val : '青年',
       tags: activeTags.length ? activeTags : ['好动爱玩'],
       vaccine: vaccineBtn ? vaccineBtn.dataset.val : '未接种',
+      color: colorBtn ? colorBtn.dataset.val : '黄色',
+      weight: weightVal === '' ? null : (parseFloat(weightVal) || null),
+      likes: activeLikes,
     };
 
     if (currentEditDogId) {
@@ -753,8 +770,9 @@ function openDogEdit(dogId) {
   document.getElementById('pageDogEdit').classList.add('active');
 
   document.querySelectorAll('#editSize .btn-option, #editAge .btn-option, #editVaccine .btn-option').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('#editTags .tag-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#editTags .tag-item, #editColor .btn-option, #editLikes .tag-item').forEach(b => b.classList.remove('active'));
   document.getElementById('editName').value = '';
+  document.getElementById('editWeight').value = '';
   document.getElementById('editAvatar').textContent = '🐕';
 
   if (dogId) {
@@ -778,6 +796,14 @@ function openDogEdit(dogId) {
         const tagBtn = document.querySelector(`#editTags .tag-item[data-tag="${tag}"]`);
         if (tagBtn) tagBtn.classList.add('active');
       });
+
+      const colorBtn = document.querySelector(`#editColor .btn-option[data-val="${dog.color}"]`);
+      if (colorBtn) colorBtn.classList.add('active');
+      if (dog.weight) document.getElementById('editWeight').value = dog.weight;
+      (dog.likes || []).forEach(like => {
+        const likeBtn = document.querySelector(`#editLikes .tag-item[data-tag="${like}"]`);
+        if (likeBtn) likeBtn.classList.add('active');
+      });
     }
   } else {
     currentEditDogId = null;
@@ -785,5 +811,6 @@ function openDogEdit(dogId) {
     document.querySelector('#editSize .btn-option[data-val="小型"]').classList.add('active');
     document.querySelector('#editAge .btn-option[data-val="青年"]').classList.add('active');
     document.querySelector('#editVaccine .btn-option[data-val="未接种"]').classList.add('active');
+    document.querySelector('#editColor .btn-option[data-val="黄色"]').classList.add('active');
   }
 }
