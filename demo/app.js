@@ -15,11 +15,63 @@ const PARKS = [
 
 const DOG_TAGS_POOL = ['中小型犬', '幼犬', '胆小', '好动', '大型犬', '温顺', '活泼'];
 
-const PLACES_DATA = [
-  { name: '浣花溪公园', dist: '1.2km', note: '傍晚狗多，有大草坪', stars: 4.5 },
-  { name: '锦城湖公园', dist: '2.5km', note: '周末人多，建议工作日去', stars: 4.0 },
-  { name: '人民公园', dist: '0.8km', note: '有专门的狗狗活动区', stars: 4.8 },
-  { name: '桂溪生态公园', dist: '3.1km', note: '草坪大，适合大型犬', stars: 4.2 },
+// 撒欢地地点（单一列表，含宝藏标记；lat/lng 用于地图 flyTo）
+let spotsData = [
+  { id: 1, name: '人民公园', dist: '0.8km', note: '有专门的狗狗活动区', stars: 4.8, lat: 30.6586, lng: 104.0553,
+    isTreasure: true, treasureReason: '专属狗狗活动区 + 饮水点，崽崽社交天花板', hot: '本周 128 只崽崽来过', tags: ['狗狗活动区', '可脱绳', '有水源'] },
+  { id: 2, name: '浣花溪公园', dist: '1.2km', note: '傍晚狗多，有大草坪', stars: 4.5, lat: 30.6436, lng: 104.0353,
+    isTreasure: true, treasureReason: '超大草坪 + 林荫道，夏天遛弯不晒', hot: '本周 96 只崽崽来过', tags: ['大草坪', '林荫道', '傍晚狗多'] },
+  { id: 3, name: '锦城湖公园', dist: '2.5km', note: '周末人多，建议工作日去', stars: 4.0, lat: 30.5836, lng: 104.0653,
+    isTreasure: false, tags: ['湖畔步道'] },
+  { id: 4, name: '桂溪生态公园', dist: '3.1km', note: '草坪大，适合大型犬', stars: 4.2, lat: 30.5636, lng: 104.0753,
+    isTreasure: false, tags: ['适合大型犬'] },
+  { id: 5, name: '沙河堡郊野公园', dist: '4.2km', note: '人少野趣足，有围栏草坪', stars: 4.6, lat: 30.6286, lng: 104.1053,
+    isTreasure: true, treasureReason: '全围栏草坪，胆崽也能放心脱绳', hot: '本周 52 只崽崽来过', tags: ['有围栏', '人少清静', '可脱绳'] },
+];
+
+// ===== 候选玩伴池（碰个爪可发现 / 地图上开放定位的陌生汪） =====
+const dogFriendsPool = [
+  { id: 'f1', name: '奶茶妈妈', avatar: '🧋', isWalking: true, openToAll: false, loc: { lat: 30.6592, lng: 104.0560 },
+    dogs: [{ name: '奶茶', emoji: '🐕', breed: '柯基', size: '小型', age: '青年', color: '棕色', weight: 10, tags: ['好动爱玩'], likes: ['零食', '奔跑'], vaccine: '已接种' }],
+    postIds: ['p1', 'p2'] },
+  { id: 'f2', name: '大壮爸比', avatar: '🧔', isWalking: true, openToAll: true, loc: { lat: 30.6442, lng: 104.0346 },
+    dogs: [{ name: '大壮', emoji: '🐕‍🦺', breed: '拉布拉多', size: '大型', age: '青年', color: '黑色', weight: 30, tags: ['社会化良好', '活泼'], likes: ['游泳', '社交'], vaccine: '已接种' }],
+    postIds: ['p3'] },
+  { id: 'f3', name: '雪球姐姐', avatar: '👩', isWalking: false, openToAll: true, loc: { lat: 30.5840, lng: 104.0660 },
+    dogs: [{ name: '雪球', emoji: '🐶', breed: '萨摩耶', size: '大型', age: '青年', color: '白色', weight: 22, tags: ['温顺', '粘人'], likes: ['奔跑', '社交'], vaccine: '已接种' }],
+    postIds: ['p4'] },
+  { id: 'f4', name: '布丁麻麻', avatar: '👩‍🦰', isWalking: false, openToAll: false, loc: { lat: 30.5640, lng: 104.0760 },
+    dogs: [{ name: '布丁', emoji: '🦮', breed: '金毛', size: '大型', age: '老年', color: '黄色', weight: 26, tags: ['温顺'], likes: ['安静', '零食'], vaccine: '已接种' }],
+    postIds: [] },
+];
+
+let myFriends = [];                    // 碰个爪添加的玩伴（池对象 + shareMyLocTo）
+let myLocationPrivacy = { mode: 'friends' };  // 'friends' | 'everyone' | 'off'
+let walkRecords = [];                  // 崽崽手账数据源
+
+// 崽崽圈动态（仅 authorId ∈ myFriends 或 'me' 可见）
+let circlePosts = [
+  { id: 'p1', authorId: 'f1', authorName: '奶茶妈妈', authorAvatar: '🧋', dogName: '奶茶', dogEmoji: '🐕',
+    cover: { gradient: 'linear-gradient(135deg, #F7C873 0%, #F4A698 100%)', emoji: '🐕' },
+    text: '今天傍晚的人民公园，奶茶交到新朋友啦～', time: '昨天 18:20', likes: 6, likedByMe: false, type: 'normal' },
+  { id: 'p2', authorId: 'f1', authorName: '奶茶妈妈', authorAvatar: '🧋', dogName: '奶茶', dogEmoji: '🐕',
+    cover: { gradient: 'linear-gradient(135deg, #A8D4E4 0%, #6BA3BE 100%)', emoji: '🐾' },
+    text: '小短腿也要努力跑步！', time: '3 天前', likes: 12, likedByMe: false, type: 'normal' },
+  { id: 'p3', authorId: 'f2', authorName: '大壮爸比', authorAvatar: '🧔', dogName: '大壮', dogEmoji: '🐕‍🦺',
+    cover: { gradient: 'linear-gradient(135deg, #6BA3BE 0%, #5A9BB5 100%)', emoji: '🏊' },
+    text: '大壮第一次下水，居然直接学会了狗刨！', time: '2 天前', likes: 9, likedByMe: false, type: 'normal' },
+  { id: 'p4', authorId: 'f3', authorName: '雪球姐姐', authorAvatar: '👩', dogName: '雪球', dogEmoji: '🐶',
+    cover: { gradient: 'linear-gradient(135deg, #FFF0ED 0%, #F4A698 100%)', emoji: '❄️' },
+    text: '雪球的微笑营业中～', time: '5 天前', likes: 15, likedByMe: false, type: 'normal' },
+];
+
+// 晒崽崽封面预设（渐变 + emoji）
+const COVER_PRESETS = [
+  { gradient: 'linear-gradient(135deg, #F7C873 0%, #F4A698 100%)', emoji: '🌞' },
+  { gradient: 'linear-gradient(135deg, #A8D4E4 0%, #6BA3BE 100%)', emoji: '🌊' },
+  { gradient: 'linear-gradient(135deg, #D9EAD3 0%, #95C795 100%)', emoji: '🌿' },
+  { gradient: 'linear-gradient(135deg, #FFF0ED 0%, #F4A698 100%)', emoji: '🌸' },
+  { gradient: 'linear-gradient(135deg, #E8F2F7 0%, #B8C9D9 100%)', emoji: '🌙' },
 ];
 
 let dogsData = [
@@ -671,17 +723,35 @@ function initEndWalkModal() {
   document.getElementById('btnConfirmEndWalk').addEventListener('click', confirmEndWalk);
 }
 
-// ===== Places Page =====
-function initPlacesPage() {
+// ===== Places Page（撒欢地：搜索 + 宝藏标记） =====
+function renderPlacesList(keyword) {
   const list = document.getElementById('placesList');
-  list.innerHTML = PLACES_DATA.map((p, i) => `
-    <div class="place-card animate-in" style="animation-delay: ${i * 0.06}s">
+  const kw = (keyword || '').trim().toLowerCase();
+  const filtered = kw
+    ? spotsData.filter(p => (p.name + p.note + (p.tags || []).join('') + (p.treasureReason || '')).toLowerCase().includes(kw))
+    : spotsData;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="places-empty" id="placesEmpty">没找到相关撒欢地～换个词试试？</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((p, i) => `
+    <div class="place-card animate-in ${p.isTreasure ? 'treasure' : ''}" style="animation-delay: ${i * 0.06}s" data-spot-id="${p.id}">
       <div class="place-card-inner">
         <div class="place-card-top">
-          <span class="place-card-name">${p.name}</span>
+          <span class="place-card-name">${p.isTreasure ? '💎 ' : ''}${p.name}</span>
           <span class="place-card-dist">${p.dist}</span>
         </div>
         <div class="place-card-note">${p.note}</div>
+        ${p.isTreasure ? `
+          <div class="place-card-treasure">
+            <div class="treasure-badge">💎 宝藏撒欢地</div>
+            <div class="treasure-reason">${p.treasureReason}</div>
+            <div class="treasure-hot">🔥 ${p.hot}</div>
+          </div>
+          <div class="place-card-spottags">${(p.tags || []).map(t => `<span class="spot-feature-tag">${t}</span>`).join('')}</div>
+        ` : ''}
         <span class="place-card-tag">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           推荐
@@ -691,6 +761,24 @@ function initPlacesPage() {
     </div>
   `).join('');
 
+  list.querySelectorAll('.place-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const spot = spotsData.find(s => s.id === parseInt(card.dataset.spotId));
+      if (!spot) return;
+      switchTab('map');
+      setTimeout(() => {
+        map.flyTo([spot.lat, spot.lng], 16, { duration: 1.0 });
+        showSpotCard({ name: spot.name, count: Math.floor(20 + Math.random() * 25) });
+      }, 400);
+    });
+  });
+}
+
+function initPlacesPage() {
+  renderPlacesList('');
+  document.getElementById('placesSearch').addEventListener('input', (e) => {
+    renderPlacesList(e.target.value);
+  });
   document.getElementById('btnAddPlace').addEventListener('click', () => {
     alert('标记新地点功能开发中...');
   });

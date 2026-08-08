@@ -1467,3 +1467,23 @@ body {
 .btn-publish:active { transform: scale(0.95); }
 .friends-count { font-size: var(--fs-caption); color: var(--c-text-tertiary); font-weight: 400; }
 .menu-icon { display: flex; align-items: center; justify-content: center; }
+
+/* ===== Task 2: 撒欢地搜索 + 宝藏 ===== */
+.place-card.treasure {
+  border: 1.5px solid rgba(247, 200, 115, 0.55);
+  background: linear-gradient(180deg, #FFFDF7 0%, #FFFFFF 40%);
+}
+.place-card-spottags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.spot-feature-tag {
+  font-size: var(--fs-micro); padding: 3px 8px; border-radius: var(--r-tag);
+  background: var(--c-primary-light); color: var(--c-primary); font-weight: 600;
+}
+.place-card-treasure { margin-top: 8px; }
+.treasure-badge {
+  display: inline-block; font-size: var(--fs-micro); font-weight: 700;
+  color: var(--c-gold-dark); background: #FDF6E3;
+  padding: 3px 8px; border-radius: var(--r-tag); margin-bottom: 4px;
+}
+.treasure-reason { font-size: var(--fs-caption); color: var(--c-text-secondary); line-height: 1.5; }
+.treasure-hot { font-size: var(--fs-micro); color: var(--c-peach); margin-top: 4px; font-weight: 600; }
+.places-empty { text-align: center; color: var(--c-text-tertiary); font-size: var(--fs-body); padding: 40px 0; }
