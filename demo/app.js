@@ -127,13 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initDogEditPage();
   initFriendsPages();
   initBump();
+  initSettingsPage();
   updateStatusTime();
   setInterval(updateStatusTime, 60000);
 });
 
 // ===== Forward Declarations（骨架占位，后续任务实现） =====
 function renderCircleTimeline() {}
-function renderSettingsPrivacy() {}
 function renderFriendMarkers() {}
 
 function renderWalkRecords() {}
@@ -1208,4 +1208,28 @@ function openFriendDetail(friendId) {
     </div>
   `).join('');
   openSubPage('pageFriendDetail');
+}
+
+// ===== 小窝设置：崽崽在哪 =====
+function renderSettingsPrivacy() {
+  document.querySelectorAll('#pageSettings .privacy-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.mode === myLocationPrivacy.mode);
+  });
+  document.getElementById('privacyOffNote').style.display =
+    myLocationPrivacy.mode === 'off' ? '' : 'none';
+}
+
+function initSettingsPage() {
+  document.querySelectorAll('#pageSettings .privacy-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      myLocationPrivacy.mode = opt.dataset.mode;
+      renderSettingsPrivacy();
+      renderFriendsList(); // 玩伴卡片状态文案可同步（若后续扩展）
+    });
+  });
+  document.getElementById('btnGoPerFriendPrivacy').addEventListener('click', () => {
+    document.getElementById('pageSettings').classList.remove('active');
+    renderFriendsList();
+    document.getElementById('pageFriends').classList.add('active');
+  });
 }

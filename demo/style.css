@@ -1631,3 +1631,31 @@ body {
   background: var(--c-surface); border-radius: var(--r-card);
   box-shadow: var(--shadow-sm); padding: 16px;
 }
+
+/* ===== Task 5: 小窝设置 ===== */
+.settings-body { padding: var(--sp-md) var(--sp-lg) 30px; }
+.settings-section-title { font-size: var(--fs-card-title); font-weight: 700; color: var(--c-text); margin-bottom: var(--sp-md); }
+.settings-sub { font-size: var(--fs-caption); color: var(--c-text-tertiary); font-weight: 400; margin-left: 6px; }
+.privacy-option {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: var(--c-surface); border: 1.5px solid transparent;
+  border-radius: var(--r-card); padding: 14px 16px; margin-bottom: var(--sp-sm);
+  box-shadow: var(--shadow-sm); cursor: pointer;
+}
+.privacy-option.active { border-color: var(--c-primary); background: var(--c-primary-light); }
+.privacy-radio {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+  border: 2px solid var(--c-border); position: relative;
+}
+.privacy-option.active .privacy-radio { border-color: var(--c-primary); }
+.privacy-option.active .privacy-radio::after {
+  content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--c-primary);
+}
+.privacy-name { font-size: var(--fs-body); font-weight: 600; color: var(--c-text); }
+.privacy-desc { font-size: var(--fs-caption); color: var(--c-text-secondary); margin-top: 2px; line-height: 1.5; }
+.settings-note {
+  background: var(--c-peach-light); color: var(--c-peach); font-size: var(--fs-caption);
+  border-radius: var(--r-tag); padding: 8px 12px; margin-top: 4px;
+}
+.settings-divider { height: 1px; background: var(--c-border); margin: var(--sp-lg) 0; }
+.settings-link { color: var(--c-primary); font-size: var(--fs-body); font-weight: 600; }
