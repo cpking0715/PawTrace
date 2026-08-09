@@ -451,7 +451,7 @@ body {
 .back-btn:active { opacity: 0.6; }
 
 /* ===== Places Page ===== */
-.places-list { padding: var(--sp-md) var(--sp-lg) 80px; display: flex; flex-direction: column; gap: 12px; }
+.places-list { padding: var(--sp-md) var(--sp-lg) 4px; display: flex; flex-direction: column; gap: 12px; }
 .place-card {
   background: var(--c-surface);
   border-radius: var(--r-card);
@@ -507,9 +507,10 @@ body {
 .place-card-stars svg { width: 12px; height: 12px; }
 
 .fab-btn {
-  position: absolute;
+  position: sticky;
   bottom: 16px;
-  right: 16px;
+  margin: 0 16px 16px auto;
+  width: fit-content;
   background: var(--c-primary-gradient);
   color: #fff;
   border: none;
