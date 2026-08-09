@@ -1,15 +1,15 @@
 /* ============================================================
-   PawTrace Demo — "清晨公园" Design System
-   Foggy-blue + Peach + Warm-gold on warm-white
+   PawTrace Demo — "奶油杏橙" Design System
+   Cream-apricot + Peach + Warm-gold on warm-white
    ============================================================ */
 
 /* ===== Design Tokens ===== */
 :root {
-  /* --- Brand: 雾霭蓝 --- */
-  --c-primary: #6BA3BE;
-  --c-primary-dark: #5A8FA8;
-  --c-primary-light: #E8F2F7;
-  --c-primary-gradient: linear-gradient(135deg, #6BA3BE 0%, #5A9BB5 100%);
+  /* --- Brand: 奶油杏橙 --- */
+  --c-primary: #EE9B58;
+  --c-primary-dark: #D9843F;
+  --c-primary-light: #FDF1E4;
+  --c-primary-gradient: linear-gradient(135deg, #F5AA66 0%, #E8883F 100%);
 
   /* --- Accent: 蜜桃粉 --- */
   --c-peach: #F4A698;
@@ -32,9 +32,9 @@
   --c-border: #EDE8E3;
 
   /* --- Heatmap --- */
-  --heat-low: #D4E8F0;
-  --heat-mid-low: #A8D4E4;
-  --heat-mid-high: #F4C8A8;
+  --heat-low: #FBEEDC;
+  --heat-mid-low: #F8D2A6;
+  --heat-mid-high: #F4B27E;
   --heat-high: #F4A698;
 
   /* --- Shadows (warm-toned) --- */
@@ -42,7 +42,7 @@
   --shadow-md: 0 4px 16px rgba(160,140,120,0.08);
   --shadow-lg: 0 8px 32px rgba(160,140,120,0.12);
   --shadow-phone: 0 30px 80px rgba(0,0,0,0.45), 0 0 0 1.5px rgba(60,55,50,0.25);
-  --shadow-primary: 0 4px 16px rgba(107,163,190,0.25);
+  --shadow-primary: 0 4px 16px rgba(238,155,88,0.30);
 
   /* --- Radius --- */
   --r-pill: 999px;
@@ -101,7 +101,7 @@ body {
   justify-content: center;
   height: 100vh;
   background:
-    radial-gradient(ellipse at 30% 40%, rgba(107,163,190,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 30% 40%, rgba(238,155,88,0.10) 0%, transparent 55%),
     radial-gradient(ellipse at 75% 65%, rgba(244,166,152,0.07) 0%, transparent 50%),
     linear-gradient(150deg, #2A2D35 0%, #23262E 50%, #1E2028 100%);
 }
@@ -140,7 +140,7 @@ body {
   background: radial-gradient(circle at 40% 40%, #3a3a3e, #1a1a1e);
   border-radius: 50%;
   z-index: 1002;
-  box-shadow: inset 0 0 2px rgba(107,163,190,0.2), 0 0 0 1px rgba(50,50,50,0.8);
+  box-shadow: inset 0 0 2px rgba(238,155,88,0.2), 0 0 0 1px rgba(50,50,50,0.8);
 }
 
 .phone-notch { display: none; }
@@ -257,7 +257,7 @@ body {
 }
 .btn-walking:active {
   transform: scale(0.96);
-  box-shadow: 0 2px 8px rgba(107,163,190,0.20), inset 0 1px 0 rgba(255,255,255,0.10);
+  box-shadow: 0 2px 8px rgba(238,155,88,0.20), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 .btn-walking .walking-icon { display: flex; align-items: center; }
 
@@ -412,7 +412,7 @@ body {
 .tab-item.tab-walking.active .tab-icon {
   background: var(--c-primary);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(107,163,190,0.3);
+  box-shadow: 0 2px 8px rgba(238,155,88,0.3);
 }
 .tab-item.tab-walking.active .tab-icon svg { stroke: #fff; }
 
@@ -758,7 +758,7 @@ body {
 .form-input::placeholder { color: var(--c-text-tertiary); }
 .form-input:focus {
   border-color: var(--c-primary);
-  box-shadow: 0 0 0 3px rgba(107,163,190,0.12);
+  box-shadow: 0 0 0 3px rgba(238,155,88,0.12);
 }
 
 .btn-group { display: flex; gap: var(--sp-sm); }
@@ -1115,7 +1115,7 @@ body {
   position: absolute;
   inset: -8px;
   border-radius: var(--r-circle);
-  background: rgba(107,163,190,0.20);
+  background: rgba(238,155,88,0.20);
   animation: pulse 2s ease-in-out infinite;
 }
 @keyframes pulse {
@@ -1160,7 +1160,7 @@ body {
   align-items: center;
   justify-content: space-between;
   z-index: 600;
-  box-shadow: 0 6px 24px rgba(107,163,190,0.18), 0 0 0 0.5px rgba(107,163,190,0.10);
+  box-shadow: 0 6px 24px rgba(238,155,88,0.18), 0 0 0 0.5px rgba(238,155,88,0.10);
   animation: slideDownIn 0.4s var(--ease-decel) forwards;
   pointer-events: none;   /* 穿透点击，避免遮挡下方狗标记 */
 }
@@ -1277,7 +1277,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  box-shadow: 0 2px 8px rgba(107,163,190,0.4);
+  box-shadow: 0 2px 8px rgba(238,155,88,0.4);
   border: 2px solid #fff;
   position: relative;
 }
@@ -1323,7 +1323,7 @@ body {
   justify-content: center;
   font-size: 30px;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1.5px rgba(107,163,190,0.25);
+  box-shadow: inset 0 0 0 1.5px rgba(238,155,88,0.25);
 }
 .dog-info-head-right { flex: 1; min-width: 0; }
 .dog-info-name { font-size: 18px; font-weight: 700; color: var(--c-text); }
@@ -1379,7 +1379,7 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  box-shadow: inset 0 0 0 1px rgba(107,163,190,0.20);
+  box-shadow: inset 0 0 0 1px rgba(238,155,88,0.20);
 }
 .end-walk-stats {
   display: flex;
@@ -1459,7 +1459,7 @@ body {
   background: var(--c-surface); font-size: var(--fs-body); color: var(--c-text);
   outline: none;
 }
-.places-search:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(107,163,190,0.12); }
+.places-search:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px rgba(238,155,88,0.12); }
 .btn-publish {
   padding: 6px 14px; border: none; border-radius: var(--r-pill);
   background: var(--c-primary-gradient); color: #fff;
@@ -1670,8 +1670,8 @@ body {
   animation: haloPulse 1.8s ease-out infinite;
 }
 @keyframes haloPulse {
-  0% { box-shadow: 0 0 0 0 rgba(107,163,190,0.45); }
-  100% { box-shadow: 0 0 0 14px rgba(107,163,190,0); }
+  0% { box-shadow: 0 0 0 0 rgba(238,155,88,0.45); }
+  100% { box-shadow: 0 0 0 14px rgba(238,155,88,0); }
 }
 .friend-marker-icon {
   position: absolute; left: 50%; top: 20px; transform: translate(-50%, -50%);
@@ -1762,8 +1762,8 @@ body {
 }
 .post-walk-report {
   margin: 0 14px; padding: 12px 14px; border-radius: var(--r-tag);
-  background: linear-gradient(135deg, var(--c-primary-light) 0%, #F4EEF7 100%);
-  border: 1px dashed rgba(107,163,190,0.4);
+  background: linear-gradient(135deg, var(--c-primary-light) 0%, var(--c-peach-light) 100%);
+  border: 1px dashed rgba(238,155,88,0.4);
 }
 .post-walk-title { font-size: var(--fs-caption); font-weight: 700; color: var(--c-primary); margin-bottom: 6px; }
 .post-walk-stats { display: flex; gap: 12px; font-size: var(--fs-caption); color: var(--c-text); font-weight: 600; flex-wrap: wrap; }

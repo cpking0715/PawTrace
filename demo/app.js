@@ -55,10 +55,10 @@ let circlePosts = [
     cover: { gradient: 'linear-gradient(135deg, #F7C873 0%, #F4A698 100%)', emoji: '🐕' },
     text: '今天傍晚的人民公园，奶茶交到新朋友啦～', time: '昨天 18:20', likes: 6, likedByMe: false, type: 'normal' },
   { id: 'p2', authorId: 'f1', authorName: '奶茶妈妈', authorAvatar: '🧋', dogName: '奶茶', dogEmoji: '🐕',
-    cover: { gradient: 'linear-gradient(135deg, #A8D4E4 0%, #6BA3BE 100%)', emoji: '🐾' },
+    cover: { gradient: 'linear-gradient(135deg, #F8D2A6 0%, #EE9B58 100%)', emoji: '🐾' },
     text: '小短腿也要努力跑步！', time: '3 天前', likes: 12, likedByMe: false, type: 'normal' },
   { id: 'p3', authorId: 'f2', authorName: '大壮爸比', authorAvatar: '🧔', dogName: '大壮', dogEmoji: '🐕‍🦺',
-    cover: { gradient: 'linear-gradient(135deg, #6BA3BE 0%, #5A9BB5 100%)', emoji: '🏊' },
+    cover: { gradient: 'linear-gradient(135deg, #F5AA66 0%, #E8883F 100%)', emoji: '🏊' },
     text: '大壮第一次下水，居然直接学会了狗刨！', time: '2 天前', likes: 9, likedByMe: false, type: 'normal' },
   { id: 'p4', authorId: 'f3', authorName: '雪球姐姐', authorAvatar: '👩', dogName: '雪球', dogEmoji: '🐶',
     cover: { gradient: 'linear-gradient(135deg, #FFF0ED 0%, #F4A698 100%)', emoji: '❄️' },
@@ -68,10 +68,10 @@ let circlePosts = [
 // 晒崽崽封面预设（渐变 + emoji）
 const COVER_PRESETS = [
   { gradient: 'linear-gradient(135deg, #F7C873 0%, #F4A698 100%)', emoji: '🌞' },
-  { gradient: 'linear-gradient(135deg, #A8D4E4 0%, #6BA3BE 100%)', emoji: '🌊' },
+  { gradient: 'linear-gradient(135deg, #F8D2A6 0%, #EE9B58 100%)', emoji: '🍑' },
   { gradient: 'linear-gradient(135deg, #D9EAD3 0%, #95C795 100%)', emoji: '🌿' },
   { gradient: 'linear-gradient(135deg, #FFF0ED 0%, #F4A698 100%)', emoji: '🌸' },
-  { gradient: 'linear-gradient(135deg, #E8F2F7 0%, #B8C9D9 100%)', emoji: '🌙' },
+  { gradient: 'linear-gradient(135deg, #F9EBD7 0%, #E0BE96 100%)', emoji: '🌙' },
 ];
 
 let dogsData = [
@@ -192,7 +192,7 @@ function initMap() {
   PARKS.forEach(park => {
     const marker = L.circleMarker([park.lat, park.lng], {
       radius: 9,
-      fillColor: '#6BA3BE',
+      fillColor: '#EE9B58',
       fillOpacity: 0.55,
       color: '#fff',
       weight: 2.5,
@@ -240,9 +240,9 @@ function renderHeatmap(sizeFilter) {
     maxZoom: 17,
     max: 1.0,
     gradient: {
-      0.2: '#D4E8F0',
-      0.4: '#A8D4E4',
-      0.6: '#F4C8A8',
+      0.2: '#FBEEDC',
+      0.4: '#F8D2A6',
+      0.6: '#F4B27E',
       0.8: '#F4A698',
       1.0: '#E8836F',
     },
@@ -513,7 +513,7 @@ function initWalkingPageMap() {
       maxZoom: 19, subdomains: 'abcd',
     }).addTo(walkingPageMap);
     L.circleMarker([30.62, 104.06], {
-      radius: 6, fillColor: '#6BA3BE', fillOpacity: 1, color: '#fff', weight: 2,
+      radius: 6, fillColor: '#EE9B58', fillOpacity: 1, color: '#fff', weight: 2,
     }).addTo(walkingPageMap);
   }, 100);
 }
@@ -1484,7 +1484,7 @@ function renderSummaryTrack(record) {
   summaryLayers = [];
   if (!record.track || record.track.length < 2) return;
   const latlngs = record.track.map(p => [p.lat, p.lng]);
-  const line = L.polyline(latlngs, { color: '#6BA3BE', weight: 4, opacity: 0.9 }).addTo(summaryMap);
+  const line = L.polyline(latlngs, { color: '#EE9B58', weight: 4, opacity: 0.9 }).addTo(summaryMap);
   const start = L.circleMarker(latlngs[0], { radius: 6, fillColor: '#5FA97F', fillOpacity: 1, color: '#fff', weight: 2 }).addTo(summaryMap);
   const end = L.circleMarker(latlngs[latlngs.length - 1], { radius: 6, fillColor: '#F4A698', fillOpacity: 1, color: '#fff', weight: 2 }).addTo(summaryMap);
   summaryLayers.push(line, start, end);
@@ -1506,7 +1506,7 @@ function initWalkSummaryPage() {
     circlePosts.unshift({
       id: 'post' + Date.now(), authorId: 'me', authorName: '我', authorAvatar: '🏠',
       dogName: r.dogs.map(d => d.name).join('、'), dogEmoji: r.dogs[0] ? r.dogs[0].emoji : '🐶',
-      cover: { gradient: 'linear-gradient(135deg, #6BA3BE 0%, #5A9BB5 100%)', emoji: '🏅' },
+      cover: { gradient: 'linear-gradient(135deg, #F5AA66 0%, #E8883F 100%)', emoji: '🏅' },
       text: document.getElementById('publishWalkText').value.trim() || '今天的遛弯战报出炉啦～',
       time: '刚刚', likes: 0, likedByMe: false,
       type: 'walkReport',
